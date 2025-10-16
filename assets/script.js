@@ -244,6 +244,27 @@ function grayOutRandomTiles(count) {
   return n;
 }
 
+function igniteRandomTiles(count) {
+  const pool = [];
+  for (let r=0; r<GRID_SIZE; r++) {
+    for (let c=0; c<GRID_SIZE; c++) {
+      if (grid[r][c].type !== TILE_TYPES.FIRE) pool.push({ r, c });
+    }
+  }
+  if (pool.length === 0 || count <= 0) return 0;
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const n = Math.min(count, pool.length);
+  for (let i=0; i<n; i++) {
+    const { r, c } = pool[i];
+    grid[r][c].type = TILE_TYPES.FIRE;
+  }
+  renderGrid();
+  return n;
+}
+
 function applyEnemyDebuffs() {
   const debuffs = enemy.debuffs || [];
   for (const d of debuffs) {
@@ -255,11 +276,27 @@ function applyEnemyDebuffs() {
           if (turned > 0) log(`Enemy hex: ${turned} tile${turned>1?'s':''} turned gray.`);
           break;
         }
+        case 'ignite_tiles': {
+          const turned = igniteRandomTiles(d.count || 1);
+          if (turned > 0) log(`Enemy hex: ${turned} tile${turned>1?'s':''} ignited.`);
+          break;
+        }
         default:
           break;
       }
     }
   }
+}
+
+// Fire hazard damage: each FIRE tile deals ½ heart per turn
+function countFireTiles() {
+  let n = 0;
+  for (let r=0; r<GRID_SIZE; r++) {
+    for (let c=0; c<GRID_SIZE; c++) {
+      if (grid[r][c].type === TILE_TYPES.FIRE) n++;
+    }
+  }
+  return n;
 }
 
 // Game end
@@ -295,6 +332,25 @@ function enemyAttack() {
 
   // Debuffs after attack
   applyEnemyDebuffs();
+
+  // Environmental: fire tiles deal damage
+  applyFireHazard();
+}
+
+  // Debuffs after attack
+  applyEnemyDebuffs();
+
+  // Fire hazard damage after debuffs (tiles that remain/appear this turn)
+  const fires = countFireTiles();
+  if (fires > 0) {
+    const hazardHalves = fires * 1; // ½ heart per fire tile
+    player.takeDamage(hazardHalves);
+    renderHearts();
+    const hazardHearts = hazardHalves / 2;
+    floatDamage(playerHeartsEl, hazardHearts === 0.5 ? '−½' : `−${hazardHearts}`, 'player');
+    log(`🔥 Fire burns you for ${hazardHearts === 0.5 ? '½' : hazardHearts} heart${hazardHearts === 1 ? '' : hazardHearts === 0.5 ? '' : 's'} (${fires} fire tile${fires>1?'s':''}).`);
+    if (player.isDead()) { gameLost(); return; }
+  }
 }
 
 function playerAttack(word, attackHalves, healHalves) {

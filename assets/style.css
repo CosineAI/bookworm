@@ -159,6 +159,21 @@ footer {
 .tile.type-red { background: #fee2e2; outline: 2px solid #fecaca; }
 .tile.type-green { background: #dcfce7; outline: 2px solid #bbf7d0; }
 .tile.type-gray { background: #e5e7eb; color: #374151; outline: 2px solid #d1d5db; }
+.tile.type-fire {
+  background: radial-gradient(70% 70% at 50% 45%, #ffedd5 0%, #fdba74 40%, #fb923c 70%, #ef4444 100%);
+  outline: 2px solid #fca5a5;
+  color: #111827;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.08), 0 10px 24px rgba(244,63,94,0.18);
+  animation: flameFlicker 1.2s ease-in-out infinite;
+}
+
+@keyframes flameFlicker {
+  0% { filter: brightness(1); transform: translateY(0); }
+  30% { filter: brightness(1.05); transform: translateY(-1px); }
+  45% { filter: brightness(0.95); transform: translateY(0); }
+  60% { filter: brightness(1.1); transform: translateY(-1px); }
+  100% { filter: brightness(1); transform: translateY(0); }
+}
 
 /* Falling animation for newly refilled letters */
 .tile.fall-in {

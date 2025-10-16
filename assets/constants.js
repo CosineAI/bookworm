@@ -12,15 +12,17 @@ export const ENEMY_DAMAGE_HALVES = 1;
 // Tile types and spawn probabilities
 export const TILE_TYPES = {
   NORMAL: 'normal',
-  RED: 'red',     // extra damage
-  GREEN: 'green', // heals
-  GRAY: 'gray',   // no damage
+  RED: 'red',     // extra damage on word
+  GREEN: 'green', // heals on word
+  GRAY: 'gray',   // no damage on word
+  FIRE: 'fire',   // environmental damage each turn
 };
 
 export const TILE_TYPE_PROBABILITIES = {
   red: 0.10,
   green: 0.10,
   gray: 0.10,
+  fire: 0.08,
   // normal is implied as the remainder
 };
 
