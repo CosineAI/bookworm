@@ -7,9 +7,16 @@ const frequencyDist = [
   ['K',1], ['J',1], ['X',1], ['Q',1], ['Z',1]
 ];
 
+// Slightly reduce vowel appearance without changing damage tiers
+const VOWELS = new Set(['A','E','I','O','U']);
+const VOWEL_BIAS = 0.8; // 80% of original weight
+
 const weightedLetters = (() => {
   const arr = [];
-  for (const [ch, n] of frequencyDist) for (let i=0;i<n;i++) arr.push(ch);
+  for (const [ch, n] of frequencyDist) {
+    const adjusted = VOWELS.has(ch) ? Math.max(1, Math.floor(n * VOWEL_BIAS)) : n;
+    for (let i=0;i<adjusted;i++) arr.push(ch);
+  }
   return arr;
 })();
 
