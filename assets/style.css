@@ -110,6 +110,11 @@ footer {
   background: #fde68a; /* amber */
   color: #7a3c00;
 }
+
+/* Hide dictionary status container */
+#dictStatus {
+  display: none;
+}
 .muted {
   color: #6b7280;
 }
