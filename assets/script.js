@@ -289,7 +289,8 @@ function submitWord() {
 
 function isValidWord(w) {
   if (!w || w.length < 2) return false;
-  if (dictLoaded && dictionarySet) return dictionarySet.has(w);
+  // Prefer whatever dictionary we currently have (remote or local fallback)
+  if (dictionarySet) return dictionarySet.has(w);
   return fallbackSet.has(w);
 }
 
