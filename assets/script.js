@@ -2,7 +2,6 @@
 import { GRID_SIZE, PLAYER_MAX_HEARTS, ENEMY_MAX_HEARTS, HALF, ENEMY_DAMAGE_HALVES, TILE_TYPES } from './constants.js';
 import { makeTile, badgeFor } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
-import { FALLBACK_WORDS } from './dictionaryFallback.js';
 import { Combatant, Enemy } from './combatants.js';
 
 // DOM
@@ -31,10 +30,15 @@ let selectedSet = new Set();
 let gameOver = false;
 let refillAnimSet = new Set(); // positions to animate falling when refilled
 
-// Dictionary
-let dictionarySet = null;
-let dictLoaded = false;
-const fallbackSet = new Set(FALLBACK_WORDS);
+// Dictionary - start with a tiny built-in set so you can play immediately
+const BUILTIN_SMALL_SET = new Set([
+  'a','an','and','are','as','at','be','by','can','do','for','go','had','has','have','he','her','him','his','i',
+  'in','is','it','like','man','me','my','no','not','of','on','one','or','our','out','said','see','she','so',
+  'the','their','them','then','there','they','this','to','two','up','use','was','we','well','were','what',
+  'when','which','who','will','with','word','work','would','year','you','your','red','blue','green','day',
+  'boy','girl','dog','cat','run','walk','play','read','write','big','small','good','bad'
+]);
+let dictionarySet = BUILTIN_SMALL_SET;
 
 // Grid helpers
 function initGrid() {
@@ -289,35 +293,35 @@ function submitWord() {
 
 function isValidWord(w) {
   if (!w || w.length < 2) return false;
-  // Prefer whatever dictionary we currently have (remote or local fallback)
-  if (dictionarySet) return dictionarySet.has(w);
-  return fallbackSet.has(w);
+  // Always check against the currently active dictionary (remote, local, or built-in)
+  return dictionarySet ? dictionarySet.has(w) : false;
 }
 
 // Dictionary loading (non-blocking: play allowed via fallback while it loads)
 async function initDictionary() {
   dictStatusEl.textContent = 'Loading dictionary… fallback active';
   dictStatusEl.classList.add('pill');
-  submitBtn.disabled = false; // enable with fallback immediately
+  submitBtn.disabled = false; // enable with built-in fallback immediately
+
   try {
     const res = await loadEnglishDictionary();
     dictionarySet = res.set;
-    dictLoaded = !res.isFallback ? true : false;
     dictStatusEl.textContent = res.info;
     if (res.isFallback) {
       dictStatusEl.style.background = '#fee2e2';
       dictStatusEl.style.color = '#7f1d1d';
-      log('Dictionary fetch failed. Using small built-in fallback list.');
+      log(res.info);
     } else {
       dictStatusEl.style.background = '#dcfce7';
       dictStatusEl.style.color = '#14532d';
       log(res.info);
     }
   } catch {
-    dictStatusEl.textContent = 'Offline mode: small fallback dictionary';
+    // Keep using built-in set
+    dictStatusEl.textContent = 'Offline mode: small built-in dictionary';
     dictStatusEl.style.background = '#fee2e2';
     dictStatusEl.style.color = '#7f1d1d';
-    log('Dictionary fetch failed. Using small built-in fallback list.');
+    log('Dictionary fetch failed. Using built-in fallback list.');
   }
 }
 

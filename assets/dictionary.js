@@ -1,6 +1,15 @@
 // Dictionary loader with fallback
 import { DICT_URLS } from './constants.js';
-import { FALLBACK_WORDS } from './dictionaryFallback.js';
+
+// Minimal built-in fallback to ensure immediate play if both remote and local fail.
+// This is intentionally small; the preferred offline list is assets/fallback-words.txt.
+const BUILTIN_SMALL_FALLBACK = [
+  'a','an','and','are','as','at','be','by','can','do','for','go','had','has','have','he','her','him','his','i',
+  'in','is','it','like','man','me','my','no','not','of','on','one','or','our','out','said','see','she','so',
+  'the','their','them','then','there','they','this','to','two','up','use','was','we','well','were','what',
+  'when','which','who','will','with','word','work','would','year','you','your','red','blue','green','day',
+  'boy','girl','dog','cat','run','walk','play','read','write','big','small','good','bad'
+];
 
 async function tryLoadFrom(url) {
   const res = await fetch(url, { cache: 'force-cache' });
@@ -41,7 +50,7 @@ export async function loadEnglishDictionary(urls = DICT_URLS) {
   }
 
   // 3) Built-in tiny fallback (JS array)
-  const set = new Set(FALLBACK_WORDS);
+  const set = new Set(BUILTIN_SMALL_FALLBACK);
   return {
     set,
     isFallback: true,
