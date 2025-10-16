@@ -37,7 +37,7 @@ export function badgeFor(type) {
 export function effectDescription(type) {
   switch (type) {
     case TILE_TYPES.RED:
-      return 'Red: Deals double damage when used.';
+      return 'Red: This letter deals double damage when used.';
     case TILE_TYPES.GREEN:
       return 'Green: Heals you by ½ heart when used.';
     case TILE_TYPES.GRAY:
