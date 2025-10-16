@@ -262,7 +262,8 @@ function shuffleGrid() {
   }
   clearSelection();
   renderGrid();
-  log('Shuffled letters.');
+  log('Shuffled letters. Passing turn...');
+  enemyAttack();
 }
 
 function refillUsedTiles(used) {
