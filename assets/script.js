@@ -45,6 +45,12 @@ let holyVowelActive = false;
 // Status effects
 let nextEnemyAttackHalved = false;
 
+// Big attack cadence (random every 3–5 attacks)
+function randomBigAttackInterval() {
+  return 3 + Math.floor(Math.random() * 3); // 3, 4, or 5
+}
+let nextBigAttackIn = randomBigAttackInterval();
+
 // Dictionary - start with a tiny built-in set so you can play immediately
 const BUILTIN_SMALL_SET = new Set([
   'a','an','and','are','as','at','be','by','can','do','for','go','had','has','have','he','her','him','his','i',
@@ -378,6 +384,17 @@ function enemyAttack() {
   if (gameOver) return;
   let dmg = enemy.damageHalvesPerTurn; // in half-hearts
 
+  // Big attack check
+  nextBigAttackIn -= 1;
+  let isBig = false;
+  if (nextBigAttackIn <= 0) {
+    isBig = true;
+    log(`IM CHARGING`);
+    dmg *= 3;
+    nextBigAttackIn = randomBigAttackInterval();
+  }
+
+  // Apply poison halving to this attack (including big attacks)
   if (nextEnemyAttackHalved) {
     const original = dmg;
     dmg = Math.floor(dmg / 2);
@@ -390,7 +407,7 @@ function enemyAttack() {
   const hearts = dmg / 2;
   const label = hearts === 0.5 ? '−½' : `−${hearts}`;
   floatDamage(playerHeartsEl, label, 'player');
-  log(`Enemy strikes for ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}.`);
+  log(`Enemy strikes for ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}${isBig ? ' [BIG ATTACK]' : ''}.`);
   if (player.isDead()) { gameLost(); return; }
 
   // Debuffs after attack
@@ -493,6 +510,10 @@ async function initDictionary() {
 function resetGame() {
   gameOver = false;
   player.hp = player.maxHearts * HALF;
+
+  // Clear transient statuses
+  nextEnemyAttackHalved = false;
+  nextBigAttackIn = randomBigAttackInterval();
 
   // Advance to the next enemy for increasing difficulty
   currentEnemyIndex = (currentEnemyIndex + 1) % ENEMIES.length;
