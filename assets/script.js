@@ -458,6 +458,7 @@ function enemyAttack() {
       updateEnemyStatusUI();
     }
   }
+}
 function playerAttack(word, attackHalves, healHalves) {
   const enemyBefore = enemy.hp;
   enemy.takeDamage(attackHalves);
