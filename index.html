@@ -3,16 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Static Site</title>
+  <title>Word Battle — Bookworm-like</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
+  <header>
+    <h1 style="margin:0;font-weight:600;font-size:1.35rem;">Word Battle</h1>
+    <div style="opacity:.85;font-size:.95rem;margin-top:.25rem;">Form real English words to attack. Enemy hits back for ½ heart each turn.</div>
+  </header>
+
   <main>
-    <h1>Welcome to Your Static Site</h1>
+    <section class="hud">
+      <div class="hud-side">
+        <div class="hud-row">
+          <span class="hud-label">You</span>
+          <span id="playerHearts" class="hearts">❤️❤️❤️❤️❤️❤️</span>
+        </div>
+        <div class="hud-row small">
+          <span class="hud-label">Attack</span>
+          <span id="attackVal">0</span>
+          <span class="muted">= letters selected</span>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <div id="dictStatus" class="pill muted">Loading dictionary…</div>
+        <div id="message" class="message"></div>
+      </div>
+
+      <div class="hud-side right">
+        <div class="hud-row">
+          <span class="hud-label">Enemy</span>
+          <span id="enemyHearts" class="hearts">❤️❤️❤️❤️❤️❤️</span>
+        </div>
+        <div class="hud-row small">
+          <span class="hud-label">Damage</span>
+          <span class="muted">= attack ÷ 2 hearts</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="board" class="board">
+      <div id="grid" class="grid" aria-label="Letter grid"></div>
+    </section>
+
+    <section class="wordbar">
+      <div class="word">
+        <span class="muted">Word:</span> <strong id="currentWord">(none)</strong>
+        <span class="muted sep">|</span>
+        <span class="muted">Letters:</span> <strong id="letterCount">0</strong>
+        <span class="muted sep">|</span>
+        <span class="muted">Attack:</span> <strong id="attackDisplay">0</strong>
+      </div>
+      <div class="controls">
+        <button id="submitBtn" class="btn primary" disabled>Attack</button>
+        <button id="clearBtn" class="btn">Clear</button>
+        <button id="shuffleBtn" class="btn">Shuffle</button>
+        <button id="newGameBtn" class="btn success" style="display:none;">New Game</button>
+      </div>
+    </section>
+
+    <section id="log" class="log" aria-live="polite"></section>
   </main>
+
   <footer>
-    <p>&copy; 2025 Your Name</p>
+    <p>&copy; 2025 Word Battle</p>
   </footer>
+
   <script src="assets/script.js"></script>
 </body>
 </html>
