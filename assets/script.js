@@ -42,6 +42,9 @@ let refillAnimSet = new Set(); // positions to animate falling when refilled
 // Player upgrades
 let holyVowelActive = false;
 
+// Status effects
+let nextEnemyAttackHalved = false;
+
 // Dictionary - start with a tiny built-in set so you can play immediately
 const BUILTIN_SMALL_SET = new Set([
   'a','an','and','are','as','at','be','by','can','do','for','go','had','has','have','he','her','him','his','i',
@@ -153,6 +156,14 @@ function computeAttackInfo() {
         break;
       case TILE_TYPES.FIRE:
         // Fire behaves like normal for attack contribution; hazard handled separately.
+        {
+          let mult = 1;
+          if (holyVowelActive && isVowel) mult *= 2;
+          attackHalvesFloat += contribution * mult;
+        }
+        break;
+      case TILE_TYPES.POISON:
+        // Poison behaves like normal for attack; status handled separately.
         {
           let mult = 1;
           if (holyVowelActive && isVowel) mult *= 2;
@@ -315,37 +326,9 @@ function applyEnemyDebuffs() {
       }
     }
   }
-} = pool[i];
-    grid[r][c].type = TILE_TYPES.FIRE;
-  }
-  renderGrid();
-  return n;
 }
 
-function applyEnemyDebuffs() {
-  const debuffs = enemy.debuffs || [];
-  for (const d of debuffs) {
-    const chance = Math.max(0, Math.min(1, d.chance || 0));
-    if (Math.random() <= chance) {
-      switch (d.type) {
-        case 'gray_tiles': {
-          const turned = grayOutRandomTiles(d.count || 1);
-          if (turned > 0) log(`Enemy hex: ${turned} tile${turned>1?'s':''} turned gray.`);
-          break;
-        }
-        case 'ignite_tiles': {
-          const turned = igniteRandomTiles(d.count || 1);
-          if (turned > 0) log(`Enemy hex: ${turned} tile${turned>1?'s':''} ignited.`);
-          break;
-        }
-        default:
-          break;
-      }
-    }
-  }
-}
-
-// Fire hazard damage: each FIRE tile deals ½ heart per turn
+// Environmental hazards (fire tiles)
 function countFireTiles() {
   let n = 0;
   for (let r=0; r<GRID_SIZE; r++) {
@@ -354,6 +337,19 @@ function countFireTiles() {
     }
   }
   return n;
+}
+
+function applyFireHazard() {
+  const count = countFireTiles();
+  if (count <= 0) return;
+  const halves = count; // 1 half-heart per fire tile
+  player.takeDamage(halves);
+  renderHearts();
+  const hearts = halves / 2;
+  const label = hearts === 0.5 ? '−½' : `−${hearts}`;
+  floatDamage(playerHeartsEl, label, 'player');
+  log(`🔥 Fire burns you for ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}.`);
+  if (player.isDead()) gameLost();
 }
 
 // Game end
@@ -380,7 +376,15 @@ function gameLost() {
 // Combat
 function enemyAttack() {
   if (gameOver) return;
-  const dmg = enemy.damageHalvesPerTurn; // in half-hearts
+  let dmg = enemy.damageHalvesPerTurn; // in half-hearts
+
+  if (nextEnemyAttackHalved) {
+    const original = dmg;
+    dmg = Math.floor(dmg / 2);
+    nextEnemyAttackHalved = false;
+    log(`☠️ Enemy is poisoned: attack halved from ${original/2} to ${dmg/2} heart${dmg/2===1?'':'s'}.`);
+  }
+
   player.takeDamage(dmg);
   renderHearts();
   const hearts = dmg / 2;
@@ -396,21 +400,7 @@ function enemyAttack() {
   applyFireHazard();
 }
 
-  // Debuffs after attack
-  applyEnemyDebuffs();
-
-  // Fire hazard damage after debuffs (tiles that remain/appear this turn)
-  const fires = countFireTiles();
-  if (fires > 0) {
-    const hazardHalves = fires * 1; // ½ heart per fire tile
-    player.takeDamage(hazardHalves);
-    renderHearts();
-    const hazardHearts = hazardHalves / 2;
-    floatDamage(playerHeartsEl, hazardHearts === 0.5 ? '−½' : `−${hazardHearts}`, 'player');
-    log(`🔥 Fire burns you for ${hazardHearts === 0.5 ? '½' : hazardHearts} heart${hazardHearts === 1 ? '' : hazardHearts === 0.5 ? '' : 's'} (${fires} fire tile${fires>1?'s':''}).`);
-    if (player.isDead()) { gameLost(); return; }
-  }
-}
+  
 
 function playerAttack(word, attackHalves, healHalves) {
   const enemyBefore = enemy.hp;
@@ -452,6 +442,14 @@ function submitWord() {
   message('');
   const used = [...selected];
   const { attackHalves, healHalves } = computeAttackInfo();
+
+  // Poison: if any selected tile is poison, halve enemy's next attack
+  const poisonUsed = used.some(({r, c}) => grid[r][c].type === TILE_TYPES.POISON);
+  if (poisonUsed) {
+    nextEnemyAttackHalved = true;
+    log('☠️ You applied poison: the enemy’s next attack will be halved.');
+  }
+
   clearSelection();
   const ended = playerAttack(w, attackHalves, healHalves);
   refillUsedTiles(used);

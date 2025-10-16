@@ -166,6 +166,12 @@ footer {
   box-shadow: inset 0 -3px 0 rgba(0,0,0,0.08), 0 10px 24px rgba(244,63,94,0.18);
   animation: flameFlicker 1.2s ease-in-out infinite;
 }
+.tile.type-poison {
+  background: radial-gradient(70% 70% at 50% 50%, #ecfeff 0%, #c7d2fe 40%, #a78bfa 75%, #7c3aed 100%);
+  outline: 2px solid #c4b5fd;
+  color: #111827;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.08), 0 8px 18px rgba(124,58,237,0.16);
+}
 
 @keyframes flameFlicker {
   0% { filter: brightness(1); transform: translateY(0); }

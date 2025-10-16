@@ -16,13 +16,16 @@ export const TILE_TYPES = {
   GREEN: 'green', // heals on word
   GRAY: 'gray',   // no damage on word
   FIRE: 'fire',   // environmental damage each turn
+  POISON: 'poison', // halves enemy's next attack when used
 };
 
 export const TILE_TYPE_PROBABILITIES = {
-  red: 0.10,
-  green: 0.10,
-  gray: 0.10,
-  fire: 0.08,
+  // Halved frequencies for specials
+  red: 0.05,
+  green: 0.05,
+  gray: 0.05,
+  fire: 0.04,
+  poison: 0.04,
   // normal is implied as the remainder
 };
 
