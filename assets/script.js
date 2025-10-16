@@ -23,6 +23,12 @@ const newGameBtn = document.getElementById('newGameBtn');
 const logEl = document.getElementById('log');
 const mainEl = document.querySelector('main');
 
+// Shop DOM
+const shopOverlay = document.getElementById('shopOverlay');
+const buyPotionBtn = document.getElementById('buyPotionBtn');
+const buyHolyVowelBtn = document.getElementById('buyHolyVowelBtn');
+const continueBtn = document.getElementById('continueBtn');
+
 // State
 const player = new Combatant(PLAYER_MAX_HEARTS);
 let currentEnemyIndex = 0;
@@ -32,6 +38,9 @@ let selected = [];         // array of {r, c}
 let selectedSet = new Set();
 let gameOver = false;
 let refillAnimSet = new Set(); // positions to animate falling when refilled
+
+// Player upgrades
+let holyVowelActive = false;
 
 // Dictionary - start with a tiny built-in set so you can play immediately
 const BUILTIN_SMALL_SET = new Set([
@@ -112,29 +121,49 @@ function computeAttackInfo() {
   let attackHalvesFloat = 0;
   let healHalves = 0;
   const letters = selected.length;
+  const vowels = new Set(['A','E','I','O','U']);
+
   for (const p of selected) {
     const cell = grid[p.r][p.c];
     if (!cell) continue;
     const base = letterDamageHalves(cell.ch);
-    // Halve letter damage; round to nearest half-heart at the end
-    const halved = base / 2;
+    let contribution = base / 2; // halve letter damage
+    const isVowel = vowels.has(String(cell.ch).toUpperCase());
 
     switch (cell.type) {
       case TILE_TYPES.RED:
-      case 'red':
-        attackHalvesFloat += halved * 2; // red doubles damage
+      case 'red': {
+        // Red doubles damage; Holy Vowel doubles vowels as well.
+        let mult = 2;
+        if (holyVowelActive && isVowel) mult *= 2;
+        attackHalvesFloat += contribution * mult;
         break;
+      }
       case TILE_TYPES.GREEN:
-      case 'green':
-        attackHalvesFloat += halved; // normal damage
+      case 'green': {
+        let mult = 1;
+        if (holyVowelActive && isVowel) mult *= 2;
+        attackHalvesFloat += contribution * mult;
         healHalves += 1;             // plus heal (constant ½ heart)
         break;
+      }
       case TILE_TYPES.GRAY:
       case 'gray':
         attackHalvesFloat += 0; // no damage
         break;
-      default:
-        attackHalvesFloat += halved; // normal
+      case TILE_TYPES.FIRE:
+        // Fire behaves like normal for attack contribution; hazard handled separately.
+        {
+          let mult = 1;
+          if (holyVowelActive && isVowel) mult *= 2;
+          attackHalvesFloat += contribution * mult;
+        }
+        break;
+      default: {
+        let mult = 1;
+        if (holyVowelActive && isVowel) mult *= 2;
+        attackHalvesFloat += contribution * mult; // normal
+      }
     }
   }
   const attackHalves = Math.round(attackHalvesFloat); // nearest ½ heart
@@ -334,7 +363,9 @@ function gameWon() {
   log('🏆 Victory! You defeated the enemy.');
   submitBtn.disabled = true;
   shuffleBtn.disabled = true;
-  newGameBtn.style.display = 'inline-block';
+
+  // Open shop between battles
+  openShop();
 }
 
 function gameLost() {
@@ -483,11 +514,53 @@ function resetGame() {
   log(`New game started. Enemy: ${enemy.name}.`);
 }
 
+// Shop
+function openShop() {
+  shopOverlay.classList.add('show');
+  shopOverlay.setAttribute('aria-hidden', 'false');
+  // Enable/disable buttons based on state
+  buyHolyVowelBtn.disabled = holyVowelActive; // already active
+  buyPotionBtn.disabled = false; // can always use a potion between battles
+}
+function closeShop() {
+  shopOverlay.classList.remove('show');
+  shopOverlay.setAttribute('aria-hidden', 'true');
+}
+
+function usePotion() {
+  const before = player.hp;
+  player.heal(player.maxHearts * HALF); // heal to full
+  const healedHearts = (player.hp - before) / 2;
+  renderHearts();
+  if (healedHearts > 0) {
+    floatDamage(playerHeartsEl, `＋${healedHearts}${healedHearts % 1 ? '' : ''}`, 'heal');
+    log(`Shop: Insta-potion used. Healed ${healedHearts} heart${healedHearts===1?'':'s'}.`);
+  } else {
+    log('Shop: You are already at full health.');
+  }
+  buyPotionBtn.disabled = true;
+}
+
+function activateHolyVowel() {
+  if (holyVowelActive) return;
+  holyVowelActive = true;
+  buyHolyVowelBtn.disabled = true;
+  log('Shop: Holy Vowel activated. Vowels deal double attack.');
+}
+
 // Events
 submitBtn.addEventListener('click', submitWord);
 clearBtn.addEventListener('click', clearSelection);
 shuffleBtn.addEventListener('click', shuffleGrid);
 newGameBtn.addEventListener('click', resetGame);
+
+// Shop events
+buyPotionBtn.addEventListener('click', usePotion);
+buyHolyVowelBtn.addEventListener('click', activateHolyVowel);
+continueBtn.addEventListener('click', () => {
+  closeShop();
+  resetGame();
+});
 
 // Kick off
 initGrid();

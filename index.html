@@ -64,6 +64,33 @@
     </section>
 
     <section id="log" class="log" aria-live="polite"></section>
+
+    <!-- Shop overlay -->
+    <div id="shopOverlay" class="shop-overlay" aria-hidden="true">
+      <div class="shop-modal" role="dialog" aria-labelledby="shopTitle" aria-modal="true">
+        <h2 id="shopTitle">Between Battles: Shop</h2>
+        <p id="shopInfo" class="muted" style="margin-top:.2rem;">Choose items to prepare for the next fight.</p>
+        <div class="shop-items">
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Insta-potion</strong>
+              <div class="muted">Fully heal to max hearts immediately.</div>
+            </div>
+            <button id="buyPotionBtn" class="btn success">Use</button>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Holy Vowel</strong>
+              <div class="muted">Double attack for vowels (A, E, I, O, U).</div>
+            </div>
+            <button id="buyHolyVowelBtn" class="btn">Activate</button>
+          </div>
+        </div>
+        <div class="shop-actions">
+          <button id="continueBtn" class="btn primary">Next Battle</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer>
