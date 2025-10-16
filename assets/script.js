@@ -276,6 +276,34 @@ function applyEnemyDebuffs() {
           if (turned > 0) log(`Enemy hex: ${turned} tile${turned>1?'s':''} turned gray.`);
           break;
         }
+        case 'fire_tiles': {
+          const ignited = igniteRandomTiles(d.count || 1);
+          if (ignited > 0) log(`Enemy hex: ${ignited} tile${ignited>1?'s':''} set ablaze.`);
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+} = pool[i];
+    grid[r][c].type = TILE_TYPES.FIRE;
+  }
+  renderGrid();
+  return n;
+}
+
+function applyEnemyDebuffs() {
+  const debuffs = enemy.debuffs || [];
+  for (const d of debuffs) {
+    const chance = Math.max(0, Math.min(1, d.chance || 0));
+    if (Math.random() <= chance) {
+      switch (d.type) {
+        case 'gray_tiles': {
+          const turned = grayOutRandomTiles(d.count || 1);
+          if (turned > 0) log(`Enemy hex: ${turned} tile${turned>1?'s':''} turned gray.`);
+          break;
+        }
         case 'ignite_tiles': {
           const turned = igniteRandomTiles(d.count || 1);
           if (turned > 0) log(`Enemy hex: ${turned} tile${turned>1?'s':''} ignited.`);
