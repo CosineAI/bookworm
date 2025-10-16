@@ -155,6 +155,18 @@ footer {
   color: #6b7280;
 }
 
+/* Falling animation for newly refilled letters */
+.tile.fall-in {
+  animation: fallIn 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes fallIn {
+  0%   { transform: translateY(-42px); opacity: 0; }
+  70%  { transform: translateY(4px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
 .wordbar {
   margin-top: 1.0rem;
   display: flex;

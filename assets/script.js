@@ -29,6 +29,7 @@
   let selected = [];         // array of {r, c}
   let selectedSet = new Set();
   let gameOver = false;
+  let refillAnimSet = new Set(); // positions to animate falling when refilled
 
   // Dictionary
   let dictionarySet = null;
@@ -75,11 +76,18 @@
         tile.setAttribute('data-pos', `${r},${c}`);
         tile.setAttribute('aria-label', `Letter ${grid[r][c]}`);
         tile.innerHTML = `<span class="ch">${grid[r][c]}</span>`;
-        if (selectedSet.has(`${r},${c}`)) tile.classList.add('selected');
+        const key = `${r},${c}`;
+        if (selectedSet.has(key)) tile.classList.add('selected');
+        if (refillAnimSet.has(key)) {
+          tile.classList.add('fall-in');
+          tile.style.animationDelay = `${r * 40}ms`; // small stagger per row
+        }
         tile.addEventListener('click', () => onTileClick(r, c));
         gridEl.appendChild(tile);
       }
     }
+    // Clear the set; animation classes are already applied to DOM nodes.
+    refillAnimSet.clear();
   }
 
   function onTileClick(r, c) {
@@ -144,7 +152,11 @@
   }
 
   function refillUsedTiles(used) {
-    for (const {r, c} of used) grid[r][c] = randomLetter();
+    refillAnimSet.clear();
+    for (const {r, c} of used) {
+      grid[r][c] = randomLetter();
+      refillAnimSet.add(`${r},${c}`);
+    }
     renderGrid();
   }
 
