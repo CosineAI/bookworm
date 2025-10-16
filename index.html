@@ -73,21 +73,31 @@
     <div id="shopOverlay" class="shop-overlay" aria-hidden="true">
       <div class="shop-modal" role="dialog" aria-labelledby="shopTitle" aria-modal="true">
         <h2 id="shopTitle">Between Battles: Shop</h2>
-        <p id="shopInfo" class="muted" style="margin-top:.2rem;">Choose items to prepare for the next fight.</p>
+        <p id="shopInfo" class="muted" style="margin-top:.2rem;">Choose ONE: heal to full OR equip one item for your next battles.</p>
         <div class="shop-items">
+          <!-- Heal option -->
           <div class="shop-item">
             <div class="shop-item-info">
-              <strong>Insta-potion</strong>
-              <div class="muted">Fully heal to max hearts immediately.</div>
+              <strong>Heal to Full</strong>
+              <div class="muted">Restore all hearts immediately.</div>
             </div>
-            <button id="buyPotionBtn" class="btn success">Use</button>
+            <button id="healBtn" class="btn success">Heal</button>
           </div>
+          <!-- Item 1 -->
           <div class="shop-item">
             <div class="shop-item-info">
-              <strong>Holy Vowel</strong>
-              <div class="muted">Double attack for vowels (A, E, I, O, U).</div>
+              <strong id="item1Name">Item A</strong>
+              <div id="item1Desc" class="muted">Description A</div>
             </div>
-            <button id="buyHolyVowelBtn" class="btn">Activate</button>
+            <button id="equipItem1Btn" class="btn">Equip</button>
+          </div>
+          <!-- Item 2 -->
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong id="item2Name">Item B</strong>
+              <div id="item2Desc" class="muted">Description B</div>
+            </div>
+            <button id="equipItem2Btn" class="btn">Equip</button>
           </div>
         </div>
         <div class="shop-actions">

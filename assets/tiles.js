@@ -2,14 +2,22 @@
 import { TILE_TYPES, TILE_TYPE_PROBABILITIES } from './constants.js';
 import { randomLetter } from './letters.js';
 
+let spawnBias = {};
+export function setSpawnBias(bias) {
+  spawnBias = { ...spawnBias, ...bias };
+}
+export function resetSpawnBias() {
+  spawnBias = {};
+}
+
 export function randomType() {
   const r = Math.random();
-  const pRed = TILE_TYPE_PROBABILITIES.red || 0;
-  const pGreen = TILE_TYPE_PROBABILITIES.green || 0;
-  const pGray = TILE_TYPE_PROBABILITIES.gray || 0;
-  const pFire = TILE_TYPE_PROBABILITIES.fire || 0;
-  const pPoison = TILE_TYPE_PROBABILITIES.poison || 0;
-  const pCursed = TILE_TYPE_PROBABILITIES.cursed || 0;
+  const pRed = (TILE_TYPE_PROBABILITIES.red || 0) * (spawnBias.red || 1);
+  const pGreen = (TILE_TYPE_PROBABILITIES.green || 0) * (spawnBias.green || 1);
+  const pGray = (TILE_TYPE_PROBABILITIES.gray || 0) * (spawnBias.gray || 1);
+  const pFire = (TILE_TYPE_PROBABILITIES.fire || 0) * (spawnBias.fire || 1);
+  const pPoison = (TILE_TYPE_PROBABILITIES.poison || 0) * (spawnBias.poison || 1);
+  const pCursed = (TILE_TYPE_PROBABILITIES.cursed || 0) * (spawnBias.cursed || 1);
 
   if (r < pRed) return TILE_TYPES.RED;
   if (r < pRed + pGreen) return TILE_TYPES.GREEN;

@@ -1,6 +1,6 @@
 // Word Battle — Bookworm-like (Refactored to modules, ready for future mechanics)
 import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES } from './constants.js';
-import { makeTile, badgeFor, effectDescription } from './tiles.js';
+import { makeTile, badgeFor, effectDescription, setSpawnBias } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
 import { Combatant } from './combatants.js';
 import { letterDamageHalves } from './letters.js';
@@ -26,8 +26,13 @@ const enemyStatusEl = document.getElementById('enemyStatus');
 
 // Shop DOM
 const shopOverlay = document.getElementById('shopOverlay');
-const buyPotionBtn = document.getElementById('buyPotionBtn');
-const buyHolyVowelBtn = document.getElementById('buyHolyVowelBtn');
+const healBtn = document.getElementById('healBtn');
+const item1NameEl = document.getElementById('item1Name');
+const item1DescEl = document.getElementById('item1Desc');
+const item2NameEl = document.getElementById('item2Name');
+const item2DescEl = document.getElementById('item2Desc');
+const equipItem1Btn = document.getElementById('equipItem1Btn');
+const equipItem2Btn = document.getElementById('equipItem2Btn');
 const continueBtn = document.getElementById('continueBtn');
 
 // State
@@ -48,8 +53,16 @@ function initEnemyCharge() {
   enemyCharge.countdown = randInt(3, 5);
 }
 
-// Player upgrades
-let holyVowelActive = false;
+// Player upgrades/effects
+const activeEffects = {
+  holyVowel: false,
+  fireproof: false,
+  healingStaff: false,
+  redEnhanced: false,
+  grayGoggles: false,
+  fireWarAxe: false,
+};
+let shopSelectionMade = false;
 
 // Status effects
 let nextEnemyAttackHalved = false;
@@ -152,46 +165,53 @@ function computeAttackInfo() {
     switch (cell.type) {
       case TILE_TYPES.RED:
       case 'red': {
-        // Red doubles damage; Holy Vowel doubles vowels as well.
-        let mult = 2;
-        if (holyVowelActive && isVowel) mult *= 2;
+        let mult = 2; // red doubles the letter's damage
+        if (activeEffects.redEnhanced) mult *= 2; // additional double -> x4 total
+        if (activeEffects.holyVowel && isVowel) mult *= 2;
         attackHalvesFloat += contribution * mult;
         break;
       }
       case TILE_TYPES.GREEN:
       case 'green': {
         let mult = 1;
-        if (holyVowelActive && isVowel) mult *= 2;
+        if (activeEffects.holyVowel && isVowel) mult *= 2;
         attackHalvesFloat += contribution * mult;
-        healHalves += 1;             // plus heal (constant ½ heart)
+        healHalves += activeEffects.healingStaff ? 2 : 1; // heal ½ or full heart
         break;
       }
       case TILE_TYPES.GRAY:
-      case 'gray':
-        attackHalvesFloat += 0; // no damage
+      case 'gray': {
+        if (activeEffects.grayGoggles) {
+          let mult = 1;
+          if (activeEffects.holyVowel && isVowel) mult *= 2;
+          attackHalvesFloat += contribution * mult;
+        } else {
+          attackHalvesFloat += 0; // no damage
+        }
         break;
+      }
       case TILE_TYPES.FIRE: {
         let mult = 1;
-        if (holyVowelActive && isVowel) mult *= 2;
+        if (activeEffects.holyVowel && isVowel) mult *= 2;
         attackHalvesFloat += contribution * mult; // behaves like normal for attack
         break;
       }
       case TILE_TYPES.POISON: {
         let mult = 1;
-        if (holyVowelActive && isVowel) mult *= 2;
+        if (activeEffects.holyVowel && isVowel) mult *= 2;
         attackHalvesFloat += contribution * mult; // behaves like normal for attack
         break;
       }
       case TILE_TYPES.CURSED: {
         let mult = 1;
-        if (holyVowelActive && isVowel) mult *= 2;
+        if (activeEffects.holyVowel && isVowel) mult *= 2;
         attackHalvesFloat += contribution * mult; // behaves like normal per-letter
         cursedCount += 1;
         break;
       }
       default: {
         let mult = 1;
-        if (holyVowelActive && isVowel) mult *= 2;
+        if (activeEffects.holyVowel && isVowel) mult *= 2;
         attackHalvesFloat += contribution * mult; // normal
       }
     }
@@ -204,6 +224,11 @@ function computeAttackInfo() {
     } else {
       attackHalvesFloat *= 1.5; // even count boosts total by x1.5
     }
+  }
+
+  // Firey War Axe: add ½ heart per fire tile on the field (in halves)
+  if (activeEffects.fireWarAxe) {
+    attackHalvesFloat += countFireTiles();
   }
 
   const attackHalves = Math.round(attackHalvesFloat); // nearest ½ heart
@@ -382,7 +407,11 @@ function countFireTiles() {
 function applyFireHazard() {
   const count = countFireTiles();
   if (count <= 0) return;
-  const halves = count; // 1 half-heart per fire tile
+  let halves = count; // 1 half-heart per fire tile
+  if (activeEffects.fireproof) {
+    halves = Math.floor(halves / 2); // rounded down to nearest half-heart
+  }
+  if (halves <= 0) return;
   player.takeDamage(halves);
   renderHearts();
   const hearts = halves / 2;
@@ -553,7 +582,6 @@ async function initDictionary() {
 
 function resetGame() {
   gameOver = false;
-  player.hp = player.maxHearts * HALF;
 
   // Clear transient status
   nextEnemyAttackHalved = false;
@@ -581,38 +609,98 @@ function resetGame() {
 
 
 
-// Shop
+// Items
+const ITEM_POOL = [
+  { key: 'holyVowel', name: 'Holy Vowel', desc: 'Double attack for vowels (A, E, I, O, U).',
+    apply: () => { activeEffects.holyVowel = true; } },
+  { key: 'fireproof', name: 'Fireproof', desc: 'Fire tiles deal half damage (rounded down).',
+    apply: () => { activeEffects.fireproof = true; } },
+  { key: 'healingStaff', name: 'Healing Staff', desc: 'Green tiles heal a full heart.',
+    apply: () => { activeEffects.healingStaff = true; } },
+  { key: 'redEnhanced', name: 'Reddy For Action', desc: 'Red tiles deal an additional double damage.',
+    apply: () => { activeEffects.redEnhanced = true; } },
+  { key: 'grayGoggles', name: 'Gray Goggles', desc: 'Gray tiles deal normal damage.',
+    apply: () => { activeEffects.grayGoggles = true; } },
+  { key: 'fireWarAxe', name: 'Firey War Axe', desc: 'Adds ½ heart damage per fire tile on the field to each attack.',
+    apply: () => { activeEffects.fireWarAxe = true; } },
+  { key: 'blessRed', name: 'Blessing of Red', desc: 'Red tiles appear twice as often.',
+    apply: () => { setSpawnBias({ red: 2 }); } },
+  { key: 'blessGreen', name: 'Blessing of Green', desc: 'Green tiles appear twice as often.',
+    apply: () => { setSpawnBias({ green: 2 }); } },
+  { key: 'blessGray', name: 'Blessing of Gray', desc: 'Gray tiles appear twice as often.',
+    apply: () => { setSpawnBias({ gray: 2 }); } },
+  { key: 'blessFire', name: 'Blessing of Fire', desc: 'Fire tiles appear twice as often.',
+    apply: () => { setSpawnBias({ fire: 2 }); } },
+  { key: 'blessPoison', name: 'Blessing of Poison', desc: 'Poison tiles appear twice as often.',
+    apply: () => { setSpawnBias({ poison: 2 }); } },
+  { key: 'blessCursed', name: 'Blessing of Cursed', desc: 'Cursed tiles appear twice as often.',
+    apply: () => { setSpawnBias({ cursed: 2 }); } },
+];
+
+let shopItems = [];
+
+function pickRandomItems(n = 2) {
+  const pool = [...ITEM_POOL];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, n);
+}
+
+function renderShopItems() {
+  const [a, b] = shopItems;
+  item1NameEl.textContent = a.name;
+  item1DescEl.textContent = a.desc;
+  item2NameEl.textContent = b.name;
+  item2DescEl.textContent = b.desc;
+}
+
 function openShop() {
+  shopSelectionMade = false;
+  shopItems = pickRandomItems(2);
+  renderShopItems();
+
+  healBtn.disabled = false;
+  equipItem1Btn.disabled = false;
+  equipItem2Btn.disabled = false;
+
   shopOverlay.classList.add('show');
   shopOverlay.setAttribute('aria-hidden', 'false');
-  // Enable/disable buttons based on state
-  buyHolyVowelBtn.disabled = holyVowelActive; // already active
-  buyPotionBtn.disabled = false; // can always use a potion between battles
 }
 function closeShop() {
   shopOverlay.classList.remove('show');
   shopOverlay.setAttribute('aria-hidden', 'true');
 }
 
-function usePotion() {
+function selectHeal() {
+  if (shopSelectionMade) return;
   const before = player.hp;
   player.heal(player.maxHearts * HALF); // heal to full
   const healedHearts = (player.hp - before) / 2;
   renderHearts();
   if (healedHearts > 0) {
     floatDamage(playerHeartsEl, `＋${healedHearts}${healedHearts % 1 ? '' : ''}`, 'heal');
-    log(`Shop: Insta-potion used. Healed ${healedHearts} heart${healedHearts===1?'':'s'}.`);
+    log(`Shop: Healed ${healedHearts} heart${healedHearts===1?'':'s'}.`);
   } else {
     log('Shop: You are already at full health.');
   }
-  buyPotionBtn.disabled = true;
+  shopSelectionMade = true;
+  healBtn.disabled = true;
+  equipItem1Btn.disabled = true;
+  equipItem2Btn.disabled = true;
 }
 
-function activateHolyVowel() {
-  if (holyVowelActive) return;
-  holyVowelActive = true;
-  buyHolyVowelBtn.disabled = true;
-  log('Shop: Holy Vowel activated. Vowels deal double attack.');
+function equipItem(index) {
+  if (shopSelectionMade) return;
+  const item = shopItems[index];
+  if (!item) return;
+  item.apply();
+  log(`Shop: Equipped ${item.name}.`);
+  shopSelectionMade = true;
+  healBtn.disabled = true;
+  equipItem1Btn.disabled = true;
+  equipItem2Btn.disabled = true;
 }
 
 // Events
@@ -622,9 +710,14 @@ shuffleBtn.addEventListener('click', shuffleGrid);
 newGameBtn.addEventListener('click', resetGame);
 
 // Shop events
-buyPotionBtn.addEventListener('click', usePotion);
-buyHolyVowelBtn.addEventListener('click', activateHolyVowel);
+healBtn.addEventListener('click', selectHeal);
+equipItem1Btn.addEventListener('click', () => equipItem(0));
+equipItem2Btn.addEventListener('click', () => equipItem(1));
 continueBtn.addEventListener('click', () => {
+  if (!shopSelectionMade) {
+    log('Shop: Choose to heal or equip one item before continuing.');
+    return;
+  }
   closeShop();
   resetGame();
 });
