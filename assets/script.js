@@ -39,6 +39,14 @@ let selectedSet = new Set();
 let gameOver = false;
 let refillAnimSet = new Set(); // positions to animate falling when refilled
 
+// Enemy charge (big attack) state
+let enemyCharge = { charging: false, countdown: 0 };
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function initEnemyCharge() {
+  enemyCharge.charging = false;
+  enemyCharge.countdown = randInt(3, 5);
+}
+
 // Player upgrades
 let holyVowelActive = false;
 
@@ -383,18 +391,11 @@ function gameLost() {
 function enemyAttack() {
   if (gameOver) return;
   let dmg = enemy.damageHalvesPerTurn; // in half-hearts
-
-  // Big attack check
-  nextBigAttackIn -= 1;
-  let isBig = false;
-  if (nextBigAttackIn <= 0) {
-    isBig = true;
-    log(`IM CHARGING`);
+  const wasCharging = enemyCharge.charging;
+  if (wasCharging) {
     dmg *= 3;
-    nextBigAttackIn = randomBigAttackInterval();
   }
 
-  // Apply poison halving to this attack (including big attacks)
   if (nextEnemyAttackHalved) {
     const original = dmg;
     dmg = Math.floor(dmg / 2);
@@ -407,7 +408,33 @@ function enemyAttack() {
   const hearts = dmg / 2;
   const label = hearts === 0.5 ? '−½' : `−${hearts}`;
   floatDamage(playerHeartsEl, label, 'player');
-  log(`Enemy strikes for ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}${isBig ? ' [BIG ATTACK]' : ''}.`);
+  if (wasCharging) {
+    log(`💢 Charged strike! ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 || hearts === 0.5 ? '' : 's'} damage.`);
+  } else {
+    log(`Enemy strikes for ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}.`);
+  }
+  if (player.isDead()) { gameLost(); return; }
+
+  // Debuffs after attack
+  applyEnemyDebuffs();
+
+  // Environmental: fire tiles deal damage
+  applyFireHazard();
+
+  // Charge state progression
+  if (wasCharging) {
+    // Consumed charged attack; schedule next charge window
+    enemyCharge.charging = false;
+    enemyCharge.countdown = randInt(3, 5);
+  } else {
+    // Count down towards next charge; announce when ready
+    enemyCharge.countdown -= 1;
+    if (enemyCharge.countdown <= 0) {
+      enemyCharge.charging = true;
+      log('IM CHARGING!');
+    }
+  }
+} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}${isBig ? ' [BIG ATTACK]' : ''}.`);
   if (player.isDead()) { gameLost(); return; }
 
   // Debuffs after attack
@@ -518,6 +545,8 @@ function resetGame() {
   // Advance to the next enemy for increasing difficulty
   currentEnemyIndex = (currentEnemyIndex + 1) % ENEMIES.length;
   enemy = createEnemy(ENEMIES[currentEnemyIndex]);
+  nextEnemyAttackHalved = false; // clear poison status between battles
+  initEnemyCharge();             // reset charge timer
 
   renderHearts();
   selected = [];
@@ -587,6 +616,7 @@ renderGrid();
 renderHearts();
 updateWordUI();
 initDictionary();
+initEnemyCharge();
 log(`Enemy: ${enemy.name}.`);
 
 // Accessibility keyboard helpers (optional)
