@@ -689,6 +689,10 @@ function selectHeal() {
   healBtn.disabled = true;
   equipItem1Btn.disabled = true;
   equipItem2Btn.disabled = true;
+
+  // Proceed immediately to next battle
+  closeShop();
+  resetGame();
 }
 
 function equipItem(index) {
@@ -701,6 +705,10 @@ function equipItem(index) {
   healBtn.disabled = true;
   equipItem1Btn.disabled = true;
   equipItem2Btn.disabled = true;
+
+  // Proceed immediately to next battle
+  closeShop();
+  resetGame();
 }
 
 // Events
