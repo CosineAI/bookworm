@@ -9,12 +9,14 @@ export function randomType() {
   const pGray = TILE_TYPE_PROBABILITIES.gray || 0;
   const pFire = TILE_TYPE_PROBABILITIES.fire || 0;
   const pPoison = TILE_TYPE_PROBABILITIES.poison || 0;
+  const pCursed = TILE_TYPE_PROBABILITIES.cursed || 0;
 
   if (r < pRed) return TILE_TYPES.RED;
   if (r < pRed + pGreen) return TILE_TYPES.GREEN;
   if (r < pRed + pGreen + pGray) return TILE_TYPES.GRAY;
   if (r < pRed + pGreen + pGray + pFire) return TILE_TYPES.FIRE;
   if (r < pRed + pGreen + pGray + pFire + pPoison) return TILE_TYPES.POISON;
+  if (r < pRed + pGreen + pGray + pFire + pPoison + pCursed) return TILE_TYPES.CURSED;
   return TILE_TYPES.NORMAL;
 }
 
@@ -28,5 +30,6 @@ export function badgeFor(type) {
   if (type === TILE_TYPES.GRAY) return 'Ø';
   if (type === TILE_TYPES.FIRE) return '🔥';
   if (type === TILE_TYPES.POISON) return '☠️';
+  if (type === TILE_TYPES.CURSED) return '⚠️';
   return '';
 }

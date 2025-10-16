@@ -22,6 +22,7 @@ const shuffleBtn = document.getElementById('shuffleBtn');
 const newGameBtn = document.getElementById('newGameBtn');
 const logEl = document.getElementById('log');
 const mainEl = document.querySelector('main');
+const enemyStatusEl = document.getElementById('enemyStatus');
 
 // Shop DOM
 const shopOverlay = document.getElementById('shopOverlay');
@@ -53,11 +54,7 @@ let holyVowelActive = false;
 // Status effects
 let nextEnemyAttackHalved = false;
 
-// Big attack cadence (random every 3–5 attacks)
-function randomBigAttackInterval() {
-  return 3 + Math.floor(Math.random() * 3); // 3, 4, or 5
-}
-let nextBigAttackIn = randomBigAttackInterval();
+
 
 // Dictionary - start with a tiny built-in set so you can play immediately
 const BUILTIN_SMALL_SET = new Set([
@@ -139,6 +136,7 @@ function computeAttackInfo() {
   let healHalves = 0;
   const letters = selected.length;
   const vowels = new Set(['A','E','I','O','U']);
+  let cursedCount = 0;
 
   for (const p of selected) {
     const cell = grid[p.r][p.c];
@@ -168,22 +166,25 @@ function computeAttackInfo() {
       case 'gray':
         attackHalvesFloat += 0; // no damage
         break;
-      case TILE_TYPES.FIRE:
-        // Fire behaves like normal for attack contribution; hazard handled separately.
-        {
-          let mult = 1;
-          if (holyVowelActive && isVowel) mult *= 2;
-          attackHalvesFloat += contribution * mult;
-        }
+      case TILE_TYPES.FIRE: {
+        let mult = 1;
+        if (holyVowelActive && isVowel) mult *= 2;
+        attackHalvesFloat += contribution * mult; // behaves like normal for attack
         break;
-      case TILE_TYPES.POISON:
-        // Poison behaves like normal for attack; status handled separately.
-        {
-          let mult = 1;
-          if (holyVowelActive && isVowel) mult *= 2;
-          attackHalvesFloat += contribution * mult;
-        }
+      }
+      case TILE_TYPES.POISON: {
+        let mult = 1;
+        if (holyVowelActive && isVowel) mult *= 2;
+        attackHalvesFloat += contribution * mult; // behaves like normal for attack
         break;
+      }
+      case TILE_TYPES.CURSED: {
+        let mult = 1;
+        if (holyVowelActive && isVowel) mult *= 2;
+        attackHalvesFloat += contribution * mult; // behaves like normal per-letter
+        cursedCount += 1;
+        break;
+      }
       default: {
         let mult = 1;
         if (holyVowelActive && isVowel) mult *= 2;
@@ -191,6 +192,16 @@ function computeAttackInfo() {
       }
     }
   }
+
+  // Apply Cursed multiplier on the total if any cursed tiles are used
+  if (cursedCount > 0) {
+    if (cursedCount % 2 === 1) {
+      attackHalvesFloat *= 0.5; // odd count halves total attack
+    } else {
+      attackHalvesFloat *= 1.5; // even count boosts total by x1.5
+    }
+  }
+
   const attackHalves = Math.round(attackHalvesFloat); // nearest ½ heart
   return { attackHalves, healHalves, letters };
 }
@@ -273,6 +284,17 @@ function log(line) {
   const p = document.createElement('div');
   p.textContent = line;
   logEl.prepend(p);
+}
+
+function updateEnemyStatusUI() {
+  if (!enemyStatusEl) return;
+  if (enemyCharge.charging) {
+    enemyStatusEl.textContent = 'Charging…';
+    enemyStatusEl.classList.add('charging');
+  } else {
+    enemyStatusEl.textContent = '—';
+    enemyStatusEl.classList.remove('charging');
+  }
 }
 
 // Enemy debuffs
@@ -426,26 +448,16 @@ function enemyAttack() {
     // Consumed charged attack; schedule next charge window
     enemyCharge.charging = false;
     enemyCharge.countdown = randInt(3, 5);
+    updateEnemyStatusUI();
   } else {
     // Count down towards next charge; announce when ready
     enemyCharge.countdown -= 1;
     if (enemyCharge.countdown <= 0) {
       enemyCharge.charging = true;
       log('IM CHARGING!');
+      updateEnemyStatusUI();
     }
   }
-} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}${isBig ? ' [BIG ATTACK]' : ''}.`);
-  if (player.isDead()) { gameLost(); return; }
-
-  // Debuffs after attack
-  applyEnemyDebuffs();
-
-  // Environmental: fire tiles deal damage
-  applyFireHazard();
-}
-
-  
-
 function playerAttack(word, attackHalves, healHalves) {
   const enemyBefore = enemy.hp;
   enemy.takeDamage(attackHalves);
@@ -538,15 +550,15 @@ function resetGame() {
   gameOver = false;
   player.hp = player.maxHearts * HALF;
 
-  // Clear transient statuses
+  // Clear transient status
   nextEnemyAttackHalved = false;
-  nextBigAttackIn = randomBigAttackInterval();
 
   // Advance to the next enemy for increasing difficulty
   currentEnemyIndex = (currentEnemyIndex + 1) % ENEMIES.length;
   enemy = createEnemy(ENEMIES[currentEnemyIndex]);
-  nextEnemyAttackHalved = false; // clear poison status between battles
-  initEnemyCharge();             // reset charge timer
+
+  initEnemyCharge();
+  updateEnemyStatusUI();
 
   renderHearts();
   selected = [];
@@ -561,6 +573,8 @@ function resetGame() {
   logEl.innerHTML = '';
   log(`New game started. Enemy: ${enemy.name}.`);
 }
+
+
 
 // Shop
 function openShop() {
@@ -617,6 +631,7 @@ renderHearts();
 updateWordUI();
 initDictionary();
 initEnemyCharge();
+updateEnemyStatusUI();
 log(`Enemy: ${enemy.name}.`);
 
 // Accessibility keyboard helpers (optional)
