@@ -155,15 +155,20 @@ footer {
   color: #6b7280;
 }
 
+/* Special tile types */
+.tile.type-red { background: #fee2e2; outline: 2px solid #fecaca; }
+.tile.type-green { background: #dcfce7; outline: 2px solid #bbf7d0; }
+.tile.type-gray { background: #e5e7eb; color: #374151; outline: 2px solid #d1d5db; }
+
 /* Falling animation for newly refilled letters */
 .tile.fall-in {
-  animation: fallIn 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: fallIn 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   will-change: transform, opacity;
 }
 
 @keyframes fallIn {
-  0%   { transform: translateY(-42px); opacity: 0; }
-  70%  { transform: translateY(4px); opacity: 1; }
+  0%   { transform: translateY(-64px); opacity: 0; }
+  70%  { transform: translateY(6px); opacity: 1; }
   100% { transform: translateY(0); opacity: 1; }
 }
 
@@ -238,6 +243,9 @@ footer {
 }
 .damage-float.enemy {
   color: #16a34a;
+}
+.damage-float.heal {
+  color: #10b981;
 }
 
 @keyframes popfade {

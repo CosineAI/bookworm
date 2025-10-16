@@ -60,9 +60,27 @@
   function randChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function randomLetter() { return randChoice(weightedLetters); }
 
+  const TILE_TYPES = { NORMAL: 'normal', RED: 'red', GREEN: 'green', GRAY: 'gray' };
+  function randomType() {
+    const r = Math.random();
+    if (r < 0.10) return TILE_TYPES.RED;     // ~10%
+    if (r < 0.20) return TILE_TYPES.GREEN;   // ~10%
+    if (r < 0.30) return TILE_TYPES.GRAY;    // ~10%
+    return TILE_TYPES.NORMAL;                // ~70%
+  }
+  function makeTile(ch = randomLetter(), type = randomType()) {
+    return { ch, type };
+  }
+  function badgeFor(type) {
+    if (type === TILE_TYPES.RED) return '💥';
+    if (type === TILE_TYPES.GREEN) return '➕';
+    if (type === TILE_TYPES.GRAY) return 'Ø';
+    return '';
+  }
+
   function initGrid() {
     grid = Array.from({length: gridSize}, () =>
-      Array.from({length: gridSize}, () => randomLetter())
+      Array.from({length: gridSize}, () => makeTile())
     );
   }
 
@@ -74,8 +92,12 @@
         tile.className = 'tile';
         tile.type = 'button';
         tile.setAttribute('data-pos', `${r},${c}`);
-        tile.setAttribute('aria-label', `Letter ${grid[r][c]}`);
-        tile.innerHTML = `<span class="ch">${grid[r][c]}</span>`;
+        const cell = grid[r][c];
+        const typeClass = cell.type !== 'normal' ? ` type-${cell.type}` : '';
+        tile.className += typeClass;
+        tile.setAttribute('aria-label', `Letter ${cell.ch}${cell.type !== 'normal' ? ' ' + cell.type + ' tile' : ''}`);
+        const badge = badgeFor(cell.type);
+        tile.innerHTML = `<span class="ch">${cell.ch}</span>${badge ? `<span class="badge">${badge}</span>` : ''}`;
         const key = `${r},${c}`;
         if (selectedSet.has(key)) tile.classList.add('selected');
         if (refillAnimSet.has(key)) {
@@ -117,17 +139,42 @@
   }
 
   function getCurrentWord() {
-    return selected.map(p => grid[p.r][p.c]).join('');
+    return selected.map(p => grid[p.r][p.c].ch).join('');
+  }
+
+  function computeAttackInfo() {
+    // returns { attackHalves, healHalves, letters }
+    let attackHalves = 0;
+    let healHalves = 0;
+    const letters = selected.length;
+    for (const p of selected) {
+      const cell = grid[p.r][p.c];
+      if (!cell) continue;
+      switch (cell.type) {
+        case 'red':
+          attackHalves += 2; // red deals double
+          break;
+        case 'green':
+          attackHalves += 1; // normal damage
+          healHalves += 1;   // plus heal
+          break;
+        case 'gray':
+          attackHalves += 0; // no damage
+          break;
+        default:
+          attackHalves += 1; // normal
+      }
+    }
+    return { attackHalves, healHalves, letters };
   }
 
   function updateWordUI() {
     const w = getCurrentWord();
     currentWordEl.textContent = w || '(none)';
-    const letters = w.length;
+    const { attackHalves, letters } = computeAttackInfo();
     letterCountEl.textContent = String(letters);
-    const attack = letters; // each letter adds 1 to attack
-    attackValEl.textContent = String(attack);
-    attackDisplayEl.textContent = String(attack);
+    attackValEl.textContent = String(attackHalves);
+    attackDisplayEl.textContent = String(attackHalves);
     submitBtn.disabled = gameOver || letters < 2; // require at least 2 letters
   }
 
@@ -143,7 +190,7 @@
     if (gameOver) return;
     for (let r=0;r<gridSize;r++) {
       for (let c=0;c<gridSize;c++) {
-        grid[r][c] = randomLetter();
+        grid[r][c] = makeTile();
       }
     }
     clearSelection();
@@ -154,7 +201,7 @@
   function refillUsedTiles(used) {
     refillAnimSet.clear();
     for (const {r, c} of used) {
-      grid[r][c] = randomLetter();
+      grid[r][c] = makeTile();
       refillAnimSet.add(`${r},${c}`);
     }
     renderGrid();
@@ -228,15 +275,26 @@
     if (playerHP <= 0) gameLost();
   }
 
-  function playerAttack(word) {
-    const attack = word.length;  // attack value = letters selected
-    const dmgHalves = attack;    // 1 letter = ½ heart
+  function playerAttack(word, attackHalves, healHalves) {
     const before = enemyHP;
-    enemyHP = Math.max(0, enemyHP - dmgHalves);
+    enemyHP = Math.max(0, enemyHP - attackHalves);
     const heartsDealt = (before - enemyHP) / 2;
     renderHearts();
     floatDamage(enemyHeartsEl, `−${heartsDealt}${heartsDealt % 1 ? '' : ''}`, 'enemy');
-    log(`You played “${word.toUpperCase()}” for attack ${attack}. Enemy took ${heartsDealt} heart${heartsDealt===1? '':'s'}.`);
+
+    // Healing from green tiles
+    if (healHalves > 0) {
+      const prev = playerHP;
+      playerHP = Math.min(playerMaxHearts * HALF, playerHP + healHalves);
+      const healedHearts = (playerHP - prev) / 2;
+      if (healedHearts > 0) {
+        renderHearts();
+        floatDamage(playerHeartsEl, `＋${healedHearts}${healedHearts % 1 ? '' : ''}`, 'heal');
+      }
+    }
+
+    log(`You played “${word.toUpperCase()}” for attack ${attackHalves}. Enemy took ${heartsDealt} heart${heartsDealt===1? '':'s'}.`);
+
     if (enemyHP <= 0) {
       gameWon();
       return true;
@@ -257,8 +315,9 @@
     }
     message('');
     const used = [...selected];
+    const { attackHalves, healHalves } = computeAttackInfo();
     clearSelection();
-    const ended = playerAttack(w);
+    const ended = playerAttack(w, attackHalves, healHalves);
     refillUsedTiles(used);
     if (!ended) enemyAttack();
   }
