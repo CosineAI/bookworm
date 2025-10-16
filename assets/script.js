@@ -3,6 +3,7 @@ import { GRID_SIZE, PLAYER_MAX_HEARTS, ENEMY_MAX_HEARTS, HALF, ENEMY_DAMAGE_HALV
 import { makeTile, badgeFor } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
 import { Combatant, Enemy } from './combatants.js';
+import { letterDamageHalves } from './letters.js';
 
 // DOM
 const gridEl = document.getElementById('grid');
@@ -112,22 +113,23 @@ function computeAttackInfo() {
   for (const p of selected) {
     const cell = grid[p.r][p.c];
     if (!cell) continue;
+    const base = letterDamageHalves(cell.ch);
     switch (cell.type) {
       case TILE_TYPES.RED:
       case 'red':
-        attackHalves += 2; // red deals double
+        attackHalves += base * 2; // red doubles damage
         break;
       case TILE_TYPES.GREEN:
       case 'green':
-        attackHalves += 1; // normal damage
-        healHalves += 1;   // plus heal
+        attackHalves += base; // normal damage
+        healHalves += 1;      // plus heal (constant)
         break;
       case TILE_TYPES.GRAY:
       case 'gray':
         attackHalves += 0; // no damage
         break;
       default:
-        attackHalves += 1; // normal
+        attackHalves += base; // normal
     }
   }
   return { attackHalves, healHalves, letters };

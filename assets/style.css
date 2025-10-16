@@ -12,7 +12,7 @@ body {
   color: #222;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto; /* allow page scrolling */
 }
 
 header {
