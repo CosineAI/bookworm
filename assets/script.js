@@ -1,402 +1,363 @@
-// Word Battle — Bookworm-like
-(() => {
-  const gridSize = 4;
-  const playerMaxHearts = 6; // in hearts
-  const enemyMaxHearts = 6;  // in hearts
-  const HALF = 2;            // store health in half-heart units
+// Word Battle — Bookworm-like (Refactored to modules, ready for future mechanics)
+import { GRID_SIZE, PLAYER_MAX_HEARTS, ENEMY_MAX_HEARTS, HALF, ENEMY_DAMAGE_HALVES, TILE_TYPES } from './constants.js';
+import { makeTile, badgeFor } from './tiles.js';
+import { loadEnglishDictionary } from './dictionary.js';
+import { FALLBACK_WORDS } from './dictionaryFallback.js';
+import { Combatant, Enemy } from './combatants.js';
 
-  // DOM
-  const gridEl = document.getElementById('grid');
-  const playerHeartsEl = document.getElementById('playerHearts');
-  const enemyHeartsEl = document.getElementById('enemyHearts');
-  const dictStatusEl = document.getElementById('dictStatus');
-  const messageEl = document.getElementById('message');
-  const currentWordEl = document.getElementById('currentWord');
-  const letterCountEl = document.getElementById('letterCount');
-  const attackValEl = document.getElementById('attackVal');
-  const attackDisplayEl = document.getElementById('attackDisplay');
-  const submitBtn = document.getElementById('submitBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const shuffleBtn = document.getElementById('shuffleBtn');
-  const newGameBtn = document.getElementById('newGameBtn');
-  const logEl = document.getElementById('log');
-  const mainEl = document.querySelector('main');
+// DOM
+const gridEl = document.getElementById('grid');
+const playerHeartsEl = document.getElementById('playerHearts');
+const enemyHeartsEl = document.getElementById('enemyHearts');
+const dictStatusEl = document.getElementById('dictStatus');
+const messageEl = document.getElementById('message');
+const currentWordEl = document.getElementById('currentWord');
+const letterCountEl = document.getElementById('letterCount');
+const attackValEl = document.getElementById('attackVal');
+const attackDisplayEl = document.getElementById('attackDisplay');
+const submitBtn = document.getElementById('submitBtn');
+const clearBtn = document.getElementById('clearBtn');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const newGameBtn = document.getElementById('newGameBtn');
+const logEl = document.getElementById('log');
+const mainEl = document.querySelector('main');
 
-  // State
-  let playerHP = playerMaxHearts * HALF; // half-hearts
-  let enemyHP = enemyMaxHearts * HALF;   // half-hearts
-  let grid = [];
-  let selected = [];         // array of {r, c}
-  let selectedSet = new Set();
-  let gameOver = false;
-  let refillAnimSet = new Set(); // positions to animate falling when refilled
+// State
+const player = new Combatant(PLAYER_MAX_HEARTS);
+const enemy = new Enemy(ENEMY_MAX_HEARTS, ENEMY_DAMAGE_HALVES);
+let grid = [];
+let selected = [];         // array of {r, c}
+let selectedSet = new Set();
+let gameOver = false;
+let refillAnimSet = new Set(); // positions to animate falling when refilled
 
-  // Dictionary
-  let dictionarySet = null;
-  let dictLoaded = false;
-  const fallbackDictionary = new Set([
-    'at','to','of','in','on','it','is','as','be','by','do','go','he','me','my','no','or','so','up','we',
-    'add','age','and','ant','any','are','art','bad','bag','bar','bat','bed','bee','bet','big','bit','box','boy','can','car','cat','cow','cut','day','did','dig','dog','dot','dry','ear','eat','far','few','fix','fox','fun','gap','get','got','gum','gun','had','has','hat','hen','her','hey','him','his','hot','ice','jam','jar','jet','job','key','kid','kin','lab','lad','leg','let','lid','lip','log','man','map','mat','mix','nap','net','new','now','nut','oak','old','one','owl','pad','pan','pen','pet','pie','pig','pin','pot','put','rag','ram','ran','rat','red','rip','rug','run','sad','sat','saw','say','sea','see','set','she','shy','sip','six','sir','sky','son','sun','tap','tea','ten','the','tie','tin','toy','try','two','use','war','was','wax','way','web','win','wow','yes','you',
-    'able','acid','ally','also','arch','area','bake','ball','bank','base','bear','beat','beef','beep','belt','bend','bill','bird','blue','bold','bomb','book','boot','born','both','bowl','bulk','burn','bury','busy','cake','calm','camp','card','care','cart','case','cash','cast','cell','chap','chat','chef','city','club','coat','code','cold','come','cook','cool','cope','copy','corn','cost','crab','crib','crop','dark','data','date','dawn','deal','desk','dial','dine','dish','dive','dock','does','done','door','dove','draw','drop','drum','duck','duty','each','easy','edge','else','even','ever','evil','exit','face','fact','fade','fail','fair','fall','farm','fast','fate','fear','feed','feel','file','film','find','fine','fire','fish','five','flag','flat','flee','fley','flex','flip','flow','fold','food','fool','foot','fork','form','fort','four','free','from','fuel','full','fund','gain','game','gate','gear','germ','gift','girl','give','glad','glow','goal','goat','gold','golf','gone','good','grab','gray','grew','grow','gulf','hair','half','hall','hand','hang','hard','harm','hate','have','hawk','head','heal','hear','heat','help','hero','hill','hold','hole','home','hood','hook','hope','horn','host','hour','huge','idea','inch','into','iron','item','jack','jail','join','jump','jury','just','keep','kept','kick','kill','kind','king','kiss','knee','knew','know','lack','lady','land','lane','last','late','lawn','lazy','lead','leaf','leak','lean','left','lend','less','life','lift','like','limb','line','lion','list','live','load','loan','lock','logo','long','look','lord','lose','loss','lost','love','luck','made','mail','main','make','male','many','mark','mass','meal','mean','meat','meet','menu','milk','mind','mine','miss','mode','mood','moon','more','most','move','much','must','name','near','neat','neck','need','news','next','nice','nine','none','nose','note','okay','once','only','open','oral','over','pace','pack','page','pain','pair','palm','park','part','pass','past','path','peak','pick','pile','pill','pink','plan','play','plot','plug','plus','poem','poet','pool','port','pose','post','pull','pure','push','quit','race','rain','rank','rare','read','real','rear','rent','rest','rice','rich','ride','ring','rise','risk','road','rock','role','roll','roof','room','root','rose','rule','rush','safe','said','sail','salt','sand','save','seat','seed','seek','seem','seen','sell','send','ship','shoe','shop','shot','show','shut','sick','side','sign','site','size','skin','slip','slow','snow','soap','soft','soil','sold','song','soon','soul','soup','sour','speak','spin','spot','star','stay','step','stop','such','suit','sure','swim','tall','tank','task','team','tech','tend','term','test','text','than','that','them','then','they','thin','this','thus','tide','till','time','tiny','told','toll','tone','tool','tour','town','tree','trip','true','tune','turn','type','unit','upon','used','user','vast','vein','very','view','visa','vote','wait','wake','walk','wall','want','ward','warm','warn','wash','wave','wear','week','well','went','were','west','what','when','whom','wide','wife','wild','will','wind','wine','wing','wire','wise','wish','with','wood','word','work','yard','yeah','year','your'
-  ]);
-  // We'll load a large dictionary from the web; fallback above works offline.
-  const DICT_URLS = [
-    'https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt',
-    'https://raw.githubusercontent.com/wordset/english-wordset/master/words.txt'
-  ];
+// Dictionary
+let dictionarySet = null;
+let dictLoaded = false;
+const fallbackSet = new Set(FALLBACK_WORDS);
 
-  // Letter distribution (approx Scrabble)
-  const weightedLetters = (() => {
-    const dist = [
-      ['E',12], ['A',9], ['I',9], ['O',8], ['N',6], ['R',6], ['T',6], ['L',4], ['S',4], ['U',4],
-      ['D',4], ['G',3], ['B',2], ['C',2], ['M',2], ['P',2], ['F',2], ['H',2], ['V',2], ['W',2], ['Y',2],
-      ['K',1], ['J',1], ['X',1], ['Q',1], ['Z',1]
-    ];
-    const arr = [];
-    for (const [ch, n] of dist) for (let i=0;i<n;i++) arr.push(ch);
-    return arr;
-  })();
+// Grid helpers
+function initGrid() {
+  grid = Array.from({length: GRID_SIZE}, () =>
+    Array.from({length: GRID_SIZE}, () => makeTile())
+  );
+}
 
-  function randChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-  function randomLetter() { return randChoice(weightedLetters); }
-
-  const TILE_TYPES = { NORMAL: 'normal', RED: 'red', GREEN: 'green', GRAY: 'gray' };
-  function randomType() {
-    const r = Math.random();
-    if (r < 0.10) return TILE_TYPES.RED;     // ~10%
-    if (r < 0.20) return TILE_TYPES.GREEN;   // ~10%
-    if (r < 0.30) return TILE_TYPES.GRAY;    // ~10%
-    return TILE_TYPES.NORMAL;                // ~70%
-  }
-  function makeTile(ch = randomLetter(), type = randomType()) {
-    return { ch, type };
-  }
-  function badgeFor(type) {
-    if (type === TILE_TYPES.RED) return '💥';
-    if (type === TILE_TYPES.GREEN) return '➕';
-    if (type === TILE_TYPES.GRAY) return 'Ø';
-    return '';
-  }
-
-  function initGrid() {
-    grid = Array.from({length: gridSize}, () =>
-      Array.from({length: gridSize}, () => makeTile())
-    );
-  }
-
-  function renderGrid() {
-    gridEl.innerHTML = '';
-    for (let r=0; r<gridSize; r++) {
-      for (let c=0; c<gridSize; c++) {
-        const tile = document.createElement('button');
-        tile.className = 'tile';
-        tile.type = 'button';
-        tile.setAttribute('data-pos', `${r},${c}`);
-        const cell = grid[r][c];
-        const typeClass = cell.type !== 'normal' ? ` type-${cell.type}` : '';
-        tile.className += typeClass;
-        tile.setAttribute('aria-label', `Letter ${cell.ch}${cell.type !== 'normal' ? ' ' + cell.type + ' tile' : ''}`);
-        const badge = badgeFor(cell.type);
-        tile.innerHTML = `<span class="ch">${cell.ch}</span>${badge ? `<span class="badge">${badge}</span>` : ''}`;
-        const key = `${r},${c}`;
-        if (selectedSet.has(key)) tile.classList.add('selected');
-        if (refillAnimSet.has(key)) {
-          tile.classList.add('fall-in');
-          tile.style.animationDelay = `${r * 40}ms`; // small stagger per row
-        }
-        tile.addEventListener('click', () => onTileClick(r, c));
-        gridEl.appendChild(tile);
+function renderGrid() {
+  gridEl.innerHTML = '';
+  for (let r=0; r<GRID_SIZE; r++) {
+    for (let c=0; c<GRID_SIZE; c++) {
+      const tile = document.createElement('button');
+      tile.className = 'tile';
+      tile.type = 'button';
+      tile.setAttribute('data-pos', `${r},${c}`);
+      const cell = grid[r][c];
+      const typeClass = cell.type !== TILE_TYPES.NORMAL ? ` type-${cell.type}` : '';
+      tile.className += typeClass;
+      tile.setAttribute('aria-label', `Letter ${cell.ch}${cell.type !== TILE_TYPES.NORMAL ? ' ' + cell.type + ' tile' : ''}`);
+      const badge = badgeFor(cell.type);
+      tile.innerHTML = `<span class="ch">${cell.ch}</span>${badge ? `<span class="badge">${badge}</span>` : ''}`;
+      const key = `${r},${c}`;
+      if (selectedSet.has(key)) tile.classList.add('selected');
+      if (refillAnimSet.has(key)) {
+        tile.classList.add('fall-in');
+        tile.style.animationDelay = `${r * 40}ms`; // small stagger per row
       }
-    }
-    // Clear the set; animation classes are already applied to DOM nodes.
-    refillAnimSet.clear();
-  }
-
-  function onTileClick(r, c) {
-    if (gameOver) return;
-    const key = `${r},${c}`;
-    if (selectedSet.has(key)) {
-      // unselect
-      selectedSet.delete(key);
-      selected = selected.filter(p => !(p.r === r && p.c === c));
-    } else {
-      selectedSet.add(key);
-      selected.push({r, c});
-    }
-    updateWordUI();
-    renderGridSelectionOnly();
-  }
-
-  function renderGridSelectionOnly() {
-    // Fast toggle classes without rebuilding whole grid
-    const children = gridEl.children;
-    for (let i=0;i<children.length;i++) {
-      const el = children[i];
-      const key = el.getAttribute('data-pos');
-      if (selectedSet.has(key)) el.classList.add('selected');
-      else el.classList.remove('selected');
+      tile.addEventListener('click', () => onTileClick(r, c));
+      gridEl.appendChild(tile);
     }
   }
+  // Clear the set; animation classes are already applied to DOM nodes.
+  refillAnimSet.clear();
+}
 
-  function getCurrentWord() {
-    return selected.map(p => grid[p.r][p.c].ch).join('');
+function onTileClick(r, c) {
+  if (gameOver) return;
+  const key = `${r},${c}`;
+  if (selectedSet.has(key)) {
+    selectedSet.delete(key);
+    selected = selected.filter(p => !(p.r === r && p.c === c));
+  } else {
+    selectedSet.add(key);
+    selected.push({r, c});
   }
+  updateWordUI();
+  renderGridSelectionOnly();
+}
 
-  function computeAttackInfo() {
-    // returns { attackHalves, healHalves, letters }
-    let attackHalves = 0;
-    let healHalves = 0;
-    const letters = selected.length;
-    for (const p of selected) {
-      const cell = grid[p.r][p.c];
-      if (!cell) continue;
-      switch (cell.type) {
-        case 'red':
-          attackHalves += 2; // red deals double
-          break;
-        case 'green':
-          attackHalves += 1; // normal damage
-          healHalves += 1;   // plus heal
-          break;
-        case 'gray':
-          attackHalves += 0; // no damage
-          break;
-        default:
-          attackHalves += 1; // normal
-      }
+function renderGridSelectionOnly() {
+  // Fast toggle classes without rebuilding whole grid
+  const children = gridEl.children;
+  for (let i=0;i<children.length;i++) {
+    const el = children[i];
+    const key = el.getAttribute('data-pos');
+    if (selectedSet.has(key)) el.classList.add('selected');
+    else el.classList.remove('selected');
+  }
+}
+
+function getCurrentWord() {
+  return selected.map(p => grid[p.r][p.c].ch).join('');
+}
+
+function computeAttackInfo() {
+  // returns { attackHalves, healHalves, letters }
+  let attackHalves = 0;
+  let healHalves = 0;
+  const letters = selected.length;
+  for (const p of selected) {
+    const cell = grid[p.r][p.c];
+    if (!cell) continue;
+    switch (cell.type) {
+      case TILE_TYPES.RED:
+      case 'red':
+        attackHalves += 2; // red deals double
+        break;
+      case TILE_TYPES.GREEN:
+      case 'green':
+        attackHalves += 1; // normal damage
+        healHalves += 1;   // plus heal
+        break;
+      case TILE_TYPES.GRAY:
+      case 'gray':
+        attackHalves += 0; // no damage
+        break;
+      default:
+        attackHalves += 1; // normal
     }
-    return { attackHalves, healHalves, letters };
   }
+  return { attackHalves, healHalves, letters };
+}
 
-  function updateWordUI() {
-    const w = getCurrentWord();
-    currentWordEl.textContent = w || '(none)';
-    const { attackHalves, letters } = computeAttackInfo();
-    letterCountEl.textContent = String(letters);
-    attackValEl.textContent = String(attackHalves);
-    attackDisplayEl.textContent = String(attackHalves);
-    submitBtn.disabled = gameOver || letters < 2; // require at least 2 letters
-  }
+function updateWordUI() {
+  const w = getCurrentWord();
+  currentWordEl.textContent = w || '(none)';
+  const { attackHalves, letters } = computeAttackInfo();
+  letterCountEl.textContent = String(letters);
+  attackValEl.textContent = String(attackHalves);
+  attackDisplayEl.textContent = String(attackHalves);
+  submitBtn.disabled = gameOver || letters < 2; // require at least 2 letters
+}
 
-  function clearSelection() {
-    selected = [];
-    selectedSet.clear();
-    updateWordUI();
-    renderGridSelectionOnly();
-    message('');
-  }
+function clearSelection() {
+  selected = [];
+  selectedSet.clear();
+  updateWordUI();
+  renderGridSelectionOnly();
+  message('');
+}
 
-  function shuffleGrid() {
-    if (gameOver) return;
-    for (let r=0;r<gridSize;r++) {
-      for (let c=0;c<gridSize;c++) {
-        grid[r][c] = makeTile();
-      }
-    }
-    clearSelection();
-    renderGrid();
-    log('Shuffled letters.');
-  }
-
-  function refillUsedTiles(used) {
-    refillAnimSet.clear();
-    for (const {r, c} of used) {
+function shuffleGrid() {
+  if (gameOver) return;
+  for (let r=0;r<GRID_SIZE;r++) {
+    for (let c=0;c<GRID_SIZE;c++) {
       grid[r][c] = makeTile();
-      refillAnimSet.add(`${r},${c}`);
     }
-    renderGrid();
   }
+  clearSelection();
+  renderGrid();
+  log('Shuffled letters.');
+}
 
-  function heartsString(currentHalves, maxHearts) {
-    let s = '';
-    const full = Math.floor(currentHalves / 2);
-    const half = currentHalves % 2;
-    for (let i=0; i<maxHearts; i++) {
-      if (i < full) s += '❤️';
-      else if (i === full && half) s += '💔';
-      else s += '🤍';
+function refillUsedTiles(used) {
+  refillAnimSet.clear();
+  for (const {r, c} of used) {
+    grid[r][c] = makeTile();
+    refillAnimSet.add(`${r},${c}`);
+  }
+  renderGrid();
+}
+
+// Hearts and messaging
+function heartsString(currentHalves, maxHearts) {
+  let s = '';
+  const full = Math.floor(currentHalves / 2);
+  const half = currentHalves % 2;
+  for (let i=0; i<maxHearts; i++) {
+    if (i < full) s += '❤️';
+    else if (i === full && half) s += '💔';
+    else s += '🤍';
+  }
+  return s;
+}
+
+function renderHearts() {
+  playerHeartsEl.textContent = heartsString(player.hp, player.maxHearts);
+  enemyHeartsEl.textContent = heartsString(enemy.hp, enemy.maxHearts);
+}
+
+function message(text, kind='') {
+  messageEl.textContent = text || '';
+  messageEl.style.color = kind === 'bad' ? '#b91c1c' : '#374151';
+}
+
+function floatDamage(targetEl, txt, kind='enemy') {
+  const span = document.createElement('span');
+  span.className = `damage-float ${kind}`;
+  span.textContent = txt;
+  const rect = targetEl.getBoundingClientRect();
+  const hostRect = mainEl.getBoundingClientRect();
+  span.style.left = `${rect.left - hostRect.left + rect.width/2 - 8}px`;
+  span.style.top = `${rect.top - hostRect.top + 8}px`;
+  mainEl.appendChild(span);
+  setTimeout(() => span.remove(), 1000);
+}
+
+function log(line) {
+  const p = document.createElement('div');
+  p.textContent = line;
+  logEl.prepend(p);
+}
+
+// Game end
+function gameWon() {
+  gameOver = true;
+  message('You win! Enemy defeated.', '');
+  log('🏆 Victory! You defeated the enemy.');
+  submitBtn.disabled = true;
+  shuffleBtn.disabled = true;
+  newGameBtn.style.display = 'inline-block';
+}
+
+function gameLost() {
+  gameOver = true;
+  message('You were defeated. Try again.', 'bad');
+  log('💀 Defeat. The enemy outlasted you.');
+  submitBtn.disabled = true;
+  shuffleBtn.disabled = true;
+  newGameBtn.style.display = 'inline-block';
+}
+
+// Combat
+function enemyAttack() {
+  if (gameOver) return;
+  const dmg = enemy.damageHalvesPerTurn; // in half-hearts
+  player.takeDamage(dmg);
+  renderHearts();
+  const hearts = dmg / 2;
+  const label = hearts === 0.5 ? '−½' : `−${hearts}`;
+  floatDamage(playerHeartsEl, label, 'player');
+  log(`Enemy strikes for ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}.`);
+  if (player.isDead()) gameLost();
+}
+
+function playerAttack(word, attackHalves, healHalves) {
+  const enemyBefore = enemy.hp;
+  enemy.takeDamage(attackHalves);
+  const heartsDealt = (enemyBefore - enemy.hp) / 2;
+  renderHearts();
+  floatDamage(enemyHeartsEl, `−${heartsDealt}${heartsDealt % 1 ? '' : ''}`, 'enemy');
+
+  if (healHalves > 0) {
+    const prev = player.hp;
+    player.heal(healHalves);
+    const healedHearts = (player.hp - prev) / 2;
+    if (healedHearts > 0) {
+      renderHearts();
+      floatDamage(playerHeartsEl, `＋${healedHearts}${healedHearts % 1 ? '' : ''}`, 'heal');
     }
-    return s;
   }
 
-  function renderHearts() {
-    playerHeartsEl.textContent = heartsString(playerHP, playerMaxHearts);
-    enemyHeartsEl.textContent = heartsString(enemyHP, enemyMaxHearts);
+  log(`You played “${word.toUpperCase()}” for attack ${attackHalves}. Enemy took ${heartsDealt} heart${heartsDealt===1? '':'s'}.`);
+
+  if (enemy.isDead()) {
+    gameWon();
+    return true;
   }
+  return false;
+}
 
-  function message(text, kind='') {
-    messageEl.textContent = text || '';
-    messageEl.style.color = kind === 'bad' ? '#b91c1c' : '#374151';
+function submitWord() {
+  if (gameOver) return;
+  const w = getCurrentWord().toLowerCase();
+  if (w.length < 2) {
+    message('Select at least 2 letters.', 'bad');
+    return;
   }
-
-  function floatDamage(targetEl, txt, kind='enemy') {
-    const span = document.createElement('span');
-    span.className = `damage-float ${kind}`;
-    span.textContent = txt;
-    const rect = targetEl.getBoundingClientRect();
-    const hostRect = mainEl.getBoundingClientRect();
-    span.style.left = `${rect.left - hostRect.left + rect.width/2 - 8}px`;
-    span.style.top = `${rect.top - hostRect.top + 8}px`;
-    mainEl.appendChild(span);
-    setTimeout(() => span.remove(), 1000);
+  if (!isValidWord(w)) {
+    message(`“${w.toUpperCase()}” is not in the dictionary.`, 'bad');
+    return;
   }
+  message('');
+  const used = [...selected];
+  const { attackHalves, healHalves } = computeAttackInfo();
+  clearSelection();
+  const ended = playerAttack(w, attackHalves, healHalves);
+  refillUsedTiles(used);
+  if (!ended) enemyAttack();
+}
 
-  function log(line) {
-    const p = document.createElement('div');
-    p.textContent = line;
-    logEl.prepend(p);
-  }
+function isValidWord(w) {
+  if (!w || w.length < 2) return false;
+  if (dictLoaded && dictionarySet) return dictionarySet.has(w);
+  return fallbackSet.has(w);
+}
 
-  function gameWon() {
-    gameOver = true;
-    message('You win! Enemy defeated.', '');
-    log('🏆 Victory! You defeated the enemy.');
-    submitBtn.disabled = true;
-    shuffleBtn.disabled = true;
-    newGameBtn.style.display = 'inline-block';
-  }
-
-  function gameLost() {
-    gameOver = true;
-    message('You were defeated. Try again.', 'bad');
-    log('💀 Defeat. The enemy outlasted you.');
-    submitBtn.disabled = true;
-    shuffleBtn.disabled = true;
-    newGameBtn.style.display = 'inline-block';
-  }
-
-  function enemyAttack() {
-    if (gameOver) return;
-    const dmg = 1; // in half-hearts (½ heart)
-    playerHP = Math.max(0, playerHP - dmg);
-    renderHearts();
-    floatDamage(playerHeartsEl, '−½', 'player');
-    log(`Enemy strikes for ½ heart.`);
-    if (playerHP <= 0) gameLost();
-  }
-
-  function playerAttack(word, attackHalves, healHalves) {
-    const before = enemyHP;
-    enemyHP = Math.max(0, enemyHP - attackHalves);
-    const heartsDealt = (before - enemyHP) / 2;
-    renderHearts();
-    floatDamage(enemyHeartsEl, `−${heartsDealt}${heartsDealt % 1 ? '' : ''}`, 'enemy');
-
-    // Healing from green tiles
-    if (healHalves > 0) {
-      const prev = playerHP;
-      playerHP = Math.min(playerMaxHearts * HALF, playerHP + healHalves);
-      const healedHearts = (playerHP - prev) / 2;
-      if (healedHearts > 0) {
-        renderHearts();
-        floatDamage(playerHeartsEl, `＋${healedHearts}${healedHearts % 1 ? '' : ''}`, 'heal');
-      }
+// Dictionary loading (non-blocking: play allowed via fallback while it loads)
+async function initDictionary() {
+  dictStatusEl.textContent = 'Loading dictionary… fallback active';
+  dictStatusEl.classList.add('pill');
+  submitBtn.disabled = false; // enable with fallback immediately
+  try {
+    const res = await loadEnglishDictionary();
+    dictionarySet = res.set;
+    dictLoaded = !res.isFallback ? true : false;
+    dictStatusEl.textContent = res.info;
+    if (res.isFallback) {
+      dictStatusEl.style.background = '#fee2e2';
+      dictStatusEl.style.color = '#7f1d1d';
+      log('Dictionary fetch failed. Using small built-in fallback list.');
+    } else {
+      dictStatusEl.style.background = '#dcfce7';
+      dictStatusEl.style.color = '#14532d';
+      log(res.info);
     }
-
-    log(`You played “${word.toUpperCase()}” for attack ${attackHalves}. Enemy took ${heartsDealt} heart${heartsDealt===1? '':'s'}.`);
-
-    if (enemyHP <= 0) {
-      gameWon();
-      return true;
-    }
-    return false;
-  }
-
-  function submitWord() {
-    if (gameOver) return;
-    const w = getCurrentWord().toLowerCase();
-    if (w.length < 2) {
-      message('Select at least 2 letters.', 'bad');
-      return;
-    }
-    if (!isValidWord(w)) {
-      message(`“${w.toUpperCase()}” is not in the dictionary.`, 'bad');
-      return;
-    }
-    message('');
-    const used = [...selected];
-    const { attackHalves, healHalves } = computeAttackInfo();
-    clearSelection();
-    const ended = playerAttack(w, attackHalves, healHalves);
-    refillUsedTiles(used);
-    if (!ended) enemyAttack();
-  }
-
-  function isValidWord(w) {
-    if (!w || w.length < 2) return false;
-    if (dictLoaded && dictionarySet) return dictionarySet.has(w);
-    return fallbackDictionary.has(w);
-  }
-
-  async function loadDictionary() {
-    // Indicate we can play with fallback while loading
-    dictStatusEl.textContent = 'Loading dictionary… fallback active';
-    dictStatusEl.classList.add('pill');
-    submitBtn.disabled = false; // enable with fallback
-    for (const url of DICT_URLS) {
-      try {
-        const res = await fetch(url, {cache: 'force-cache'});
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const text = await res.text();
-        // files are newline separated words; filter short ones
-        const words = text.split(/\r?\n/).map(s => s.trim().toLowerCase()).filter(w => w.length >= 2 && /^[a-z]+$/.test(w));
-        dictionarySet = new Set(words);
-        dictLoaded = true;
-        dictStatusEl.textContent = `Dictionary loaded (${dictionarySet.size.toLocaleString()} words)`;
-        dictStatusEl.style.background = '#dcfce7';
-        dictStatusEl.style.color = '#14532d';
-        log(`Dictionary loaded: ${dictionarySet.size.toLocaleString()} words.`);
-        return;
-      } catch (e) {
-        // try next
-      }
-    }
-    // failed
+  } catch {
     dictStatusEl.textContent = 'Offline mode: small fallback dictionary';
     dictStatusEl.style.background = '#fee2e2';
     dictStatusEl.style.color = '#7f1d1d';
     log('Dictionary fetch failed. Using small built-in fallback list.');
   }
+}
 
-  function resetGame() {
-    gameOver = false;
-    playerHP = playerMaxHearts * HALF;
-    enemyHP = enemyMaxHearts * HALF;
-    renderHearts();
-    selected = [];
-    selectedSet.clear();
-    initGrid();
-    renderGrid();
-    updateWordUI();
-    message('');
-    submitBtn.disabled = false;
-    shuffleBtn.disabled = false;
-    newGameBtn.style.display = 'none';
-    logEl.innerHTML = '';
-    log('New game started.');
-  }
-
-  // Events
-  submitBtn.addEventListener('click', submitWord);
-  clearBtn.addEventListener('click', clearSelection);
-  shuffleBtn.addEventListener('click', shuffleGrid);
-  newGameBtn.addEventListener('click', resetGame);
-
-  // Kick off
+function resetGame() {
+  gameOver = false;
+  player.hp = player.maxHearts * HALF;
+  enemy.hp = enemy.maxHearts * HALF;
+  renderHearts();
+  selected = [];
+  selectedSet.clear();
   initGrid();
   renderGrid();
-  renderHearts();
   updateWordUI();
-  loadDictionary();
+  message('');
+  submitBtn.disabled = false;
+  shuffleBtn.disabled = false;
+  newGameBtn.style.display = 'none';
+  logEl.innerHTML = '';
+  log('New game started.');
+}
 
-  // Accessibility keyboard helpers (optional)
-  gridEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const pos = e.target.getAttribute('data-pos');
-      if (pos) {
-        const [r, c] = pos.split(',').map(Number);
-        onTileClick(r, c);
-      }
+// Events
+submitBtn.addEventListener('click', submitWord);
+clearBtn.addEventListener('click', clearSelection);
+shuffleBtn.addEventListener('click', shuffleGrid);
+newGameBtn.addEventListener('click', resetGame);
+
+// Kick off
+initGrid();
+renderGrid();
+renderHearts();
+updateWordUI();
+initDictionary();
+
+// Accessibility keyboard helpers (optional)
+gridEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const pos = e.target.getAttribute('data-pos');
+    if (pos) {
+      const [r, c] = pos.split(',').map(Number);
+      onTileClick(r, c);
     }
-  });
-})();
+  }
+});
