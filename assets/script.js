@@ -1,9 +1,10 @@
 // Word Battle — Bookworm-like (Refactored to modules, ready for future mechanics)
-import { GRID_SIZE, PLAYER_MAX_HEARTS, ENEMY_MAX_HEARTS, HALF, ENEMY_DAMAGE_HALVES, TILE_TYPES } from './constants.js';
+import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES } from './constants.js';
 import { makeTile, badgeFor } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
-import { Combatant, Enemy } from './combatants.js';
+import { Combatant } from './combatants.js';
 import { letterDamageHalves } from './letters.js';
+import { ENEMIES, createEnemy } from './enemies.js';
 
 // DOM
 const gridEl = document.getElementById('grid');
@@ -24,7 +25,8 @@ const mainEl = document.querySelector('main');
 
 // State
 const player = new Combatant(PLAYER_MAX_HEARTS);
-const enemy = new Enemy(ENEMY_MAX_HEARTS, ENEMY_DAMAGE_HALVES);
+let currentEnemyIndex = 0;
+let enemy = createEnemy(ENEMIES[currentEnemyIndex]);
 let grid = [];
 let selected = [];         // array of {r, c}
 let selectedSet = new Set();
@@ -219,6 +221,47 @@ function log(line) {
   logEl.prepend(p);
 }
 
+// Enemy debuffs
+function grayOutRandomTiles(count) {
+  const pool = [];
+  for (let r=0; r<GRID_SIZE; r++) {
+    for (let c=0; c<GRID_SIZE; c++) {
+      if (grid[r][c].type !== TILE_TYPES.GRAY) pool.push({ r, c });
+    }
+  }
+  if (pool.length === 0 || count <= 0) return 0;
+  // Shuffle pool
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const n = Math.min(count, pool.length);
+  for (let i=0; i<n; i++) {
+    const { r, c } = pool[i];
+    grid[r][c].type = TILE_TYPES.GRAY;
+  }
+  renderGrid();
+  return n;
+}
+
+function applyEnemyDebuffs() {
+  const debuffs = enemy.debuffs || [];
+  for (const d of debuffs) {
+    const chance = Math.max(0, Math.min(1, d.chance || 0));
+    if (Math.random() <= chance) {
+      switch (d.type) {
+        case 'gray_tiles': {
+          const turned = grayOutRandomTiles(d.count || 1);
+          if (turned > 0) log(`Enemy hex: ${turned} tile${turned>1?'s':''} turned gray.`);
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+}
+
 // Game end
 function gameWon() {
   gameOver = true;
@@ -248,7 +291,10 @@ function enemyAttack() {
   const label = hearts === 0.5 ? '−½' : `−${hearts}`;
   floatDamage(playerHeartsEl, label, 'player');
   log(`Enemy strikes for ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}.`);
-  if (player.isDead()) gameLost();
+  if (player.isDead()) { gameLost(); return; }
+
+  // Debuffs after attack
+  applyEnemyDebuffs();
 }
 
 function playerAttack(word, attackHalves, healHalves) {
@@ -334,7 +380,11 @@ async function initDictionary() {
 function resetGame() {
   gameOver = false;
   player.hp = player.maxHearts * HALF;
-  enemy.hp = enemy.maxHearts * HALF;
+
+  // Advance to the next enemy for increasing difficulty
+  currentEnemyIndex = (currentEnemyIndex + 1) % ENEMIES.length;
+  enemy = createEnemy(ENEMIES[currentEnemyIndex]);
+
   renderHearts();
   selected = [];
   selectedSet.clear();
@@ -346,7 +396,7 @@ function resetGame() {
   shuffleBtn.disabled = false;
   newGameBtn.style.display = 'none';
   logEl.innerHTML = '';
-  log('New game started.');
+  log(`New game started. Enemy: ${enemy.name}.`);
 }
 
 // Events
@@ -361,6 +411,7 @@ renderGrid();
 renderHearts();
 updateWordUI();
 initDictionary();
+log(`Enemy: ${enemy.name}.`);
 
 // Accessibility keyboard helpers (optional)
 gridEl.addEventListener('keydown', (e) => {

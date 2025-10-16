@@ -18,9 +18,12 @@ export class Combatant {
 }
 
 export class Enemy extends Combatant {
-  constructor(maxHearts, damageHalvesPerTurn = 1, kind = 'default') {
+  constructor(maxHearts, damageHalvesPerTurn = 1, kind = 'default', options = {}) {
     super(maxHearts);
     this.damageHalvesPerTurn = damageHalvesPerTurn;
-    this.kind = kind; // reserved for future enemy typing
+    this.kind = kind;
+    this.name = options.name || kind;
+    this.desc = options.desc || '';
+    this.debuffs = Array.isArray(options.debuffs) ? options.debuffs : [];
   }
 }
