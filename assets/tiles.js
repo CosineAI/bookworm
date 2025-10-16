@@ -33,3 +33,22 @@ export function badgeFor(type) {
   if (type === TILE_TYPES.CURSED) return '⚠️';
   return '';
 }
+
+export function effectDescription(type) {
+  switch (type) {
+    case TILE_TYPES.RED:
+      return 'Red: Deals double damage when used.';
+    case TILE_TYPES.GREEN:
+      return 'Green: Heals you by ½ heart when used.';
+    case TILE_TYPES.GRAY:
+      return 'Gray: Contributes no damage when used.';
+    case TILE_TYPES.FIRE:
+      return 'Fire: Burns you for ½ heart at the end of each enemy turn until removed.';
+    case TILE_TYPES.POISON:
+      return 'Poison: Halves the enemy’s next attack when used.';
+    case TILE_TYPES.CURSED:
+      return 'Cursed: Odd count halves total attack; even count increases attack by 1.5×.';
+    default:
+      return 'Normal tile.';
+  }
+}

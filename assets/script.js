@@ -1,6 +1,6 @@
 // Word Battle — Bookworm-like (Refactored to modules, ready for future mechanics)
 import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES } from './constants.js';
-import { makeTile, badgeFor } from './tiles.js';
+import { makeTile, badgeFor, effectDescription } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
 import { Combatant } from './combatants.js';
 import { letterDamageHalves } from './letters.js';
@@ -86,7 +86,11 @@ function renderGrid() {
       tile.className += typeClass;
       tile.setAttribute('aria-label', `Letter ${cell.ch}${cell.type !== TILE_TYPES.NORMAL ? ' ' + cell.type + ' tile' : ''}`);
       const badge = badgeFor(cell.type);
-      tile.innerHTML = `<span class="ch">${cell.ch}</span>${badge ? `<span class="badge">${badge}</span>` : ''}`;
+      tile.innerHTML = `<span class=\"ch\">${cell.ch}</span>${badge ? `<span class=\"badge\">${badge}</span>` : ''}`;
+      // Hover tooltip for special tiles
+      if (cell.type && cell.type !== TILE_TYPES.NORMAL) {
+        tile.title = effectDescription(cell.type);
+      }
       const key = `${r},${c}`;
       if (selectedSet.has(key)) tile.classList.add('selected');
       if (refillAnimSet.has(key)) {
