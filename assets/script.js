@@ -107,31 +107,35 @@ function getCurrentWord() {
 
 function computeAttackInfo() {
   // returns { attackHalves, healHalves, letters }
-  let attackHalves = 0;
+  let attackHalvesFloat = 0;
   let healHalves = 0;
   const letters = selected.length;
   for (const p of selected) {
     const cell = grid[p.r][p.c];
     if (!cell) continue;
     const base = letterDamageHalves(cell.ch);
+    // Halve letter damage; round to nearest half-heart at the end
+    const halved = base / 2;
+
     switch (cell.type) {
       case TILE_TYPES.RED:
       case 'red':
-        attackHalves += base * 2; // red doubles damage
+        attackHalvesFloat += halved * 2; // red doubles damage
         break;
       case TILE_TYPES.GREEN:
       case 'green':
-        attackHalves += base; // normal damage
-        healHalves += 1;      // plus heal (constant)
+        attackHalvesFloat += halved; // normal damage
+        healHalves += 1;             // plus heal (constant ½ heart)
         break;
       case TILE_TYPES.GRAY:
       case 'gray':
-        attackHalves += 0; // no damage
+        attackHalvesFloat += 0; // no damage
         break;
       default:
-        attackHalves += base; // normal
+        attackHalvesFloat += halved; // normal
     }
   }
+  const attackHalves = Math.round(attackHalvesFloat); // nearest ½ heart
   return { attackHalves, healHalves, letters };
 }
 
