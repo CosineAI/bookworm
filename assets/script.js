@@ -189,7 +189,8 @@ function computeAttackInfo() {
         if (activeEffects.grayGoggles) {
           let mult = 1;
           if (activeEffects.holyVowel && isVowel) mult *= 2;
-          attackHalvesFloat += contribution * mult;
+          // Gray Goggles now make gray tiles deal half of normal damage
+          attackHalvesFloat += contribution * mult * 0.5;
         } else {
           attackHalvesFloat += 0; // no damage
         }
@@ -654,7 +655,7 @@ const ITEM_POOL = [
     apply: () => { activeEffects.healingStaff = true; } },
   { key: 'redEnhanced', name: 'Reddy For Action', desc: 'Red tiles deal an additional double damage.',
     apply: () => { activeEffects.redEnhanced = true; } },
-  { key: 'grayGoggles', name: 'Gray Goggles', desc: 'Gray tiles deal normal damage.',
+  { key: 'grayGoggles', name: 'Gray Goggles', desc: 'Gray tiles deal half damage.',
     apply: () => { activeEffects.grayGoggles = true; } },
   { key: 'fireWarAxe', name: 'Firey War Axe', desc: 'Adds ½ heart damage per fire tile on the field to each attack.',
     apply: () => { activeEffects.fireWarAxe = true; } },
