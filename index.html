@@ -3,16 +3,144 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Static Site</title>
+  <title>Word Battle — Bookworm-like</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
+  <header>
+    <h1 style="margin:0;font-weight:600;font-size:1.35rem;">Word Battle</h1>
+  </header>
+
   <main>
-    <h1>Welcome to Your Static Site</h1>
+    <section class="hud">
+      <div class="hud-side">
+        <div class="hud-row">
+          <span class="hud-label">You</span>
+          <span id="playerHearts" class="hearts">❤️❤️❤️❤️❤️❤️</span>
+        </div>
+        <div class="hud-row small">
+          <span class="hud-label">Attack</span>
+          <span id="attackVal">0</span>
+          <span class="muted">= sum of tile values</span>
+        </div>
+        <div class="hud-row small">
+          <span class="hud-label">Equipment</span>
+          <div id="equipmentList" class="equip-list"></div>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <div id="dictStatus" class="pill muted">Loading dictionary…</div>
+        <div id="message" class="message"></div>
+      </div>
+
+      <div class="hud-side right">
+        <div class="hud-row">
+          <span id="enemyName" class="hud-label">Enemy</span>
+          <span id="enemyHearts" class="hearts">❤️❤️❤️❤️❤️❤️</span>
+        </div>
+        <div class="hud-row small">
+          <span class="hud-label">Next</span>
+          <span id="enemyStatus" class="pill enemy-status muted">—</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="board" class="board">
+      <div id="grid" class="grid" aria-label="Letter grid"></div>
+    </section>
+
+    <section class="wordbar">
+      <div class="word">
+        <span class="muted">Word:</span> <strong id="currentWord">(none)</strong>
+        <span class="muted sep">|</span>
+        <span class="muted">Letters:</span> <strong id="letterCount">0</strong>
+        <span class="muted sep">|</span>
+        <span class="muted">Attack:</span> <strong id="attackDisplay">0</strong>
+      </div>
+      <div class="controls">
+        <button id="submitBtn" class="btn primary" disabled>Attack</button>
+        <button id="clearBtn" class="btn">Clear</button>
+        <button id="shuffleBtn" class="btn">Shuffle</button>
+        <button id="newGameBtn" class="btn success" style="display:none;">New Game</button>
+      </div>
+    </section>
+
+    <section id="log" class="log" aria-live="polite"></section>
+
+    <!-- Shop overlay -->
+    <div id="shopOverlay" class="shop-overlay" aria-hidden="true">
+      <div class="shop-modal" role="dialog" aria-labelledby="shopTitle" aria-modal="true">
+        <h2 id="shopTitle">Between Battles: Shop</h2>
+        <p id="shopInfo" class="muted" style="margin-top:.2rem;">Choose ONE: heal to full OR equip one item for your next battles.</p>
+        <div class="shop-items">
+          <!-- Heal option -->
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Heal to Full</strong>
+              <div class="muted">Restore all hearts immediately.</div>
+            </div>
+            <button id="healBtn" class="btn success">Heal</button>
+          </div>
+          <!-- Item 1 -->
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong id="item1Name">Item A</strong>
+              <div id="item1Desc" class="muted">Description A</div>
+            </div>
+            <button id="equipItem1Btn" class="btn success">Equip</button>
+          </div>
+          <!-- Item 2 -->
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong id="item2Name">Item B</strong>
+              <div id="item2Desc" class="muted">Description B</div>
+            </div>
+            <button id="equipItem2Btn" class="btn success">Equip</button>
+          </div>
+        </div>
+        <div class="shop-actions">
+          <button id="continueBtn" class="btn primary">Skip shop</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ending overlay -->
+    <div id="endingOverlay" class="shop-overlay" aria-hidden="true">
+      <div class="shop-modal" role="dialog" aria-labelledby="endingTitle" aria-modal="true">
+        <h2 id="endingTitle">Congratulations!</h2>
+        <p id="endingMessage" class="muted" style="margin-top:.2rem;">You defeated the <strong id="endingEnemyName">Dragonlord</strong>! Here are your best words:</p>
+        <div class="shop-items">
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Longest word</strong>
+              <div id="endingLongest" class="muted">(none)</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Highest attack</strong>
+              <div id="endingHighest" class="muted">(none)</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Most effects</strong>
+              <div id="endingEffects" class="muted">(none)</div>
+            </div>
+          </div>
+        </div>
+        <div class="shop-actions">
+          <button id="endingRestartBtn" class="btn primary">New Run</button>
+        </div>
+      </div>
+    </div>
   </main>
+
   <footer>
-    <p>&copy; 2025 Your Name</p>
+    <p>&copy; 2025 Word Battle</p>
   </footer>
-  <script src="assets/script.js"></script>
+
+  <script type="module" src="assets/script.js"></script>
 </body>
 </html>
