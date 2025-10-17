@@ -741,10 +741,7 @@ healBtn.addEventListener('click', selectHeal);
 equipItem1Btn.addEventListener('click', () => equipItem(0));
 equipItem2Btn.addEventListener('click', () => equipItem(1));
 continueBtn.addEventListener('click', () => {
-  if (!shopSelectionMade) {
-    log('Shop: Choose to heal or equip one item before continuing.');
-    return;
-  }
+  log('Shop: Skipped shop.');
   closeShop();
   resetGame();
 });
