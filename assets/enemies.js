@@ -9,15 +9,18 @@ export const ENEMIES = [
     kind: 'slime',
     maxHearts: 6,
     damageHalvesPerTurn: 1, // ½ heart
-    debuffs: []
+    debuffs: [
+      { type: 'gray_tiles', chance: 0.04, count: 1 },
+      { type: 'fire_tiles', chance: 0.04, count: 1 }
+    ]
   },
   {
     name: 'Goblin',
     kind: 'goblin',
     maxHearts: 6,
-    damageHalvesPerTurn: 2, // 1 heart
+    damageHalvesPerTurn: 1, // ½ heart
     debuffs: [
-      { type: 'gray_tiles', chance: 0.12, count: 1 },
+      { type: 'gray_tiles', chance: 0.04, count: 1 },
       { type: 'fire_tiles', chance: 0.08, count: 1 }
     ]
   },
@@ -25,20 +28,20 @@ export const ENEMIES = [
     name: 'Orc',
     kind: 'orc',
     maxHearts: 7,
-    damageHalvesPerTurn: 3, // 1½ hearts
+    damageHalvesPerTurn: 2, // 1 heart
     debuffs: [
-      { type: 'gray_tiles', chance: 0.16, count: 1 },
-      { type: 'fire_tiles', chance: 0.12, count: 1 }
+      { type: 'gray_tiles', chance: 0.12, count: 1 },
+      { type: 'fire_tiles', chance: 0.08, count: 1 }
     ]
   },
   {
     name: 'Troll',
     kind: 'troll',
     maxHearts: 8,
-    damageHalvesPerTurn: 4, // 2 hearts
+    damageHalvesPerTurn: 2, // 1 heart
     debuffs: [
-      { type: 'gray_tiles', chance: 0.20, count: 2 },
-      { type: 'fire_tiles', chance: 0.15, count: 2 }
+      { type: 'gray_tiles', chance: 0.12, count: 2 },
+      { type: 'fire_tiles', chance: 0.12, count: 2 }
     ]
   },
   {
@@ -47,18 +50,18 @@ export const ENEMIES = [
     maxHearts: 7,
     damageHalvesPerTurn: 3, // 1½ hearts
     debuffs: [
-      { type: 'gray_tiles', chance: 0.25, count: 2 },
-      { type: 'fire_tiles', chance: 0.20, count: 2 }
+      { type: 'gray_tiles', chance: 0.20, count: 2 },
+      { type: 'fire_tiles', chance: 0.08, count: 2 } // assumed 0.08 (8%) per request (likely typo from 0.8)
     ]
   },
   {
     name: 'Dragon Whelp',
     kind: 'dragon',
     maxHearts: 9,
-    damageHalvesPerTurn: 5, // 2½ hearts
+    damageHalvesPerTurn: 3, // 1½ hearts
     debuffs: [
-      { type: 'gray_tiles', chance: 0.30, count: 3 },
-      { type: 'fire_tiles', chance: 0.25, count: 3 }
+      { type: 'gray_tiles', chance: 0.08, count: 3 },
+      { type: 'fire_tiles', chance: 0.20, count: 3 }
     ]
   }
 ];
