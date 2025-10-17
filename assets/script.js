@@ -25,6 +25,7 @@ const logEl = document.getElementById('log');
 const mainEl = document.querySelector('main');
 const enemyStatusEl = document.getElementById('enemyStatus');
 const enemyNameEl = document.getElementById('enemyName');
+const equipmentListEl = document.getElementById('equipmentList');
 
 // Shop DOM
 const shopOverlay = document.getElementById('shopOverlay');
@@ -46,6 +47,26 @@ let selected = [];         // array of {r, c}
 let selectedSet = new Set();
 let gameOver = false;
 let refillAnimSet = new Set(); // positions to animate falling when refilled
+
+// Equipment tracking
+let equippedItems = [];
+function renderEquipment() {
+  if (!equipmentListEl) return;
+  equipmentListEl.innerHTML = '';
+  if (!equippedItems || equippedItems.length === 0) {
+    const none = document.createElement('span');
+    none.className = 'muted';
+    none.textContent = '—';
+    equipmentListEl.appendChild(none);
+    return;
+  }
+  for (const it of equippedItems) {
+    const pill = document.createElement('span');
+    pill.className = 'pill';
+    pill.textContent = it.name;
+    equipmentListEl.appendChild(pill);
+  }
+}
 
 // Run statistics across battles (reset when starting a new run)
 const runStats = {
@@ -837,6 +858,11 @@ function equipItem(index) {
   const item = shopItems[index];
   if (!item) return;
   item.apply();
+  // Track equipment list (avoid duplicates by key)
+  if (!equippedItems.find(it => it.key === item.key)) {
+    equippedItems.push({ key: item.key, name: item.name });
+  }
+  renderEquipment();
   log(`Shop: Equipped ${item.name}.`);
   shopSelectionMade = true;
   healBtn.disabled = true;
@@ -873,6 +899,7 @@ initDictionary();
 initEnemySpecial();
 updateEnemyNameUI();
 updateEnemyStatusUI();
+renderEquipment();
 log(`Enemy: ${enemy.name}.`);
 
 // Accessibility keyboard helpers (optional)

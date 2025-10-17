@@ -16,19 +16,19 @@ export function createItemPool(ctx) {
     { key: 'fireWarAxe', name: 'Firey War Axe', desc: 'Adds ½ heart damage per fire tile on the field to each attack.',
       apply: () => { activeEffects.fireWarAxe = true; } },
 
-    // Blessings: double spawn chance of a tile type
-    { key: 'blessRed', name: 'Blessing of Red', desc: 'Red tiles appear twice as often.',
-      apply: () => { setSpawnBias({ red: 2 }); } },
-    { key: 'blessGreen', name: 'Blessing of Green', desc: 'Green tiles appear twice as often.',
-      apply: () => { setSpawnBias({ green: 2 }); } },
-    { key: 'blessGray', name: 'Blessing of Gray', desc: 'Gray tiles appear twice as often.',
-      apply: () => { setSpawnBias({ gray: 2 }); } },
-    { key: 'blessFire', name: 'Blessing of Fire', desc: 'Fire tiles appear twice as often.',
-      apply: () => { setSpawnBias({ fire: 2 }); } },
-    { key: 'blessPoison', name: 'Blessing of Poison', desc: 'Poison tiles appear twice as often.',
-      apply: () => { setSpawnBias({ poison: 2 }); } },
-    { key: 'blessCursed', name: 'Blessing of Cursed', desc: 'Cursed tiles appear twice as often.',
-      apply: () => { setSpawnBias({ cursed: 2 }); } },
+    // Blessings: triple spawn chance of a tile type
+    { key: 'blessRed', name: 'Blessing of Red', desc: 'Red tiles appear three times as often.',
+      apply: () => { setSpawnBias({ red: 3 }); } },
+    { key: 'blessGreen', name: 'Blessing of Green', desc: 'Green tiles appear three times as often.',
+      apply: () => { setSpawnBias({ green: 3 }); } },
+    { key: 'blessGray', name: 'Blessing of Gray', desc: 'Gray tiles appear three times as often.',
+      apply: () => { setSpawnBias({ gray: 3 }); } },
+    { key: 'blessFire', name: 'Blessing of Fire', desc: 'Fire tiles appear three times as often.',
+      apply: () => { setSpawnBias({ fire: 3 }); } },
+    { key: 'blessPoison', name: 'Blessing of Poison', desc: 'Poison tiles appear three times as often.',
+      apply: () => { setSpawnBias({ poison: 3 }); } },
+    { key: 'blessCursed', name: 'Blessing of Cursed', desc: 'Cursed tiles appear three times as often.',
+      apply: () => { setSpawnBias({ cursed: 3 }); } },
 
     // Permanent max-heart upgrades
     { key: 'metaphorMail', name: 'Metaphor Mail', desc: '+3 max hearts (permanent).',

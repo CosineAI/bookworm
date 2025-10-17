@@ -97,6 +97,18 @@ footer {
   gap: .5rem;
 }
 
+/* Equipment list */
+.equip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  align-items: center;
+}
+.equip-list .pill {
+  background: #eef2ff;
+  color: #111827;
+}
+
 .pill {
   padding: .35rem .65rem;
   border-radius: 999px;
