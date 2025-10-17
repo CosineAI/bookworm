@@ -31,6 +31,14 @@ export const TILE_TYPE_PROBABILITIES = {
   // normal is implied as the remainder
 };
 
+// Long word bonus (applied to total attack)
+// threshold: words longer than this get a bonus
+// perExtraLetterHalves: additional half-hearts per letter beyond threshold (float allowed)
+export const LONG_WORD_BONUS = {
+  threshold: 6,
+  perExtraLetterHalves: 0.5, // +0.5 halves (= +0.25 heart) per letter beyond 6
+};
+
 // Dictionary sources
 export const DICT_URLS = [
   'https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt',

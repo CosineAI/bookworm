@@ -1,5 +1,5 @@
 // Word Battle — Bookworm-like (Refactored to modules, ready for future mechanics)
-import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES } from './constants.js';
+import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES, LONG_WORD_BONUS } from './constants.js';
 import { makeTile, badgeFor, effectDescription, setSpawnBias } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
 import { Combatant } from './combatants.js';
@@ -229,6 +229,15 @@ function computeAttackInfo() {
   // Firey War Axe: add ½ heart per fire tile on the field (in halves)
   if (activeEffects.fireWarAxe) {
     attackHalvesFloat += countFireTiles();
+  }
+
+  // Long word bonus: apply after per-letter effects and global multipliers
+  if (LONG_WORD_BONUS && typeof LONG_WORD_BONUS.threshold === 'number') {
+    const extraLetters = Math.max(0, letters - LONG_WORD_BONUS.threshold);
+    if (extraLetters > 0) {
+      const per = Number(LONG_WORD_BONUS.perExtraLetterHalves || 0);
+      attackHalvesFloat += extraLetters * per;
+    }
   }
 
   const attackHalves = Math.round(attackHalvesFloat); // nearest ½ heart
