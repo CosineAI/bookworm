@@ -38,6 +38,14 @@ const equipItem1Btn = document.getElementById('equipItem1Btn');
 const equipItem2Btn = document.getElementById('equipItem2Btn');
 const continueBtn = document.getElementById('continueBtn');
 
+// Ending DOM
+const endingOverlay = document.getElementById('endingOverlay');
+const endingEnemyNameEl = document.getElementById('endingEnemyName');
+const endingLongestEl = document.getElementById('endingLongest');
+const endingHighestEl = document.getElementById('endingHighest');
+const endingEffectsEl = document.getElementById('endingEffects');
+const endingRestartBtn = document.getElementById('endingRestartBtn');
+
 // State
 const player = new Combatant(PLAYER_MAX_HEARTS);
 let currentEnemyIndex = 0;
@@ -108,6 +116,37 @@ function showRunStats(title = 'Run stats') {
   log(`• Longest word: ${runStats.longestWord ? runStats.longestWord.toUpperCase() : '(none)'} (${runStats.longestLen})`);
   log(`• Highest attack: ${runStats.highestAttackWord ? runStats.highestAttackWord.toUpperCase() : '(none)'} (${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 || hearts === 0.5 ? '' : 's'})`);
   log(`• Most effects: ${runStats.mostEffectsWord ? runStats.mostEffectsWord.toUpperCase() : '(none)'} (${runStats.mostEffectsCount})`);
+}
+
+function openEnding() {
+  // Populate stats into ending overlay
+  if (endingEnemyNameEl) endingEnemyNameEl.textContent = enemy?.name || 'Enemy';
+  if (endingLongestEl) {
+    const w = runStats.longestWord ? runStats.longestWord.toUpperCase() : '(none)';
+    const len = runStats.longestLen || 0;
+    endingLongestEl.textContent = `${w}${len ? ` (${len} letters)` : ''}`;
+  }
+  if (endingHighestEl) {
+    const w = runStats.highestAttackWord ? runStats.highestAttackWord.toUpperCase() : '(none)';
+    const halves = runStats.highestAttackHalves || 0;
+    endingHighestEl.textContent = `${w}${halves ? ` (${formatHearts(halves)})` : ''}`;
+  }
+  if (endingEffectsEl) {
+    const w = runStats.mostEffectsWord ? runStats.mostEffectsWord.toUpperCase() : '(none)';
+    const count = runStats.mostEffectsCount || 0;
+    endingEffectsEl.textContent = `${w}${count ? ` (${count} effect${count===1?'':'s'})` : ''}`;
+  }
+  if (endingOverlay) {
+    endingOverlay.classList.add('show');
+    endingOverlay.setAttribute('aria-hidden', 'false');
+  }
+}
+
+function closeEnding() {
+  if (endingOverlay) {
+    endingOverlay.classList.remove('show');
+    endingOverlay.setAttribute('aria-hidden', 'true');
+  }
 }
 
 // Enemy special cadence state
@@ -596,8 +635,8 @@ function gameWon() {
   shuffleBtn.disabled = true;
 
   if (isFinal) {
-    showRunStats('Final run stats');
-    newGameBtn.style.display = 'inline-block';
+    // Show ending overlay with top stats
+    openEnding();
   } else {
     // Open shop between battles
     openShop();
@@ -887,6 +926,12 @@ equipItem2Btn.addEventListener('click', () => equipItem(1));
 continueBtn.addEventListener('click', () => {
   log('Shop: Skipped shop.');
   closeShop();
+  resetGame();
+});
+
+endingRestartBtn.addEventListener('click', () => {
+  closeEnding();
+  clearRunStats();
   resetGame();
 });
 
