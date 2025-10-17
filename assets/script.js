@@ -45,12 +45,17 @@ let selectedSet = new Set();
 let gameOver = false;
 let refillAnimSet = new Set(); // positions to animate falling when refilled
 
-// Enemy charge (big attack) state
-let enemyCharge = { charging: false, countdown: 0 };
-function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-function initEnemyCharge() {
-  enemyCharge.charging = false;
-  enemyCharge.countdown = randInt(3, 5);
+// Enemy special cadence state
+let enemySpecial = { every: null, countdown: null };
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; } // kept for potential future use
+function initEnemySpecial() {
+  if (enemy && enemy.special && enemy.special.every) {
+    enemySpecial.every = Math.max(1, enemy.special.every | 0);
+    enemySpecial.countdown = enemySpecial.every;
+  } else {
+    enemySpecial.every = null;
+    enemySpecial.countdown = null;
+  }
 }
 
 // Player upgrades/effects
@@ -328,13 +333,17 @@ function log(line) {
 
 function updateEnemyStatusUI() {
   if (!enemyStatusEl) return;
-  if (enemyCharge.charging) {
-    enemyStatusEl.textContent = 'Charging…';
-    enemyStatusEl.classList.add('charging');
-  } else {
+  if (enemySpecial.every == null) {
     enemyStatusEl.textContent = '—';
     enemyStatusEl.classList.remove('charging');
+    return;
   }
+  if (enemySpecial.every === 1) {
+    enemyStatusEl.textContent = 'Special each turn';
+  } else {
+    enemyStatusEl.textContent = `Special in ${enemySpecial.countdown}`;
+  }
+  enemyStatusEl.classList.remove('charging');
 }
 
 // Enemy debuffs
@@ -404,6 +413,19 @@ function applyEnemyDebuffs() {
   }
 }
 
+// Deterministic special actions applied on scheduled turns
+function applySpecialActions(actions) {
+  if (!actions || actions.length === 0) return;
+  let gr = 0, fr = 0;
+  for (const a of actions) {
+    const count = Math.max(1, a.count | 0);
+    if (a.type === 'gray_tiles') gr += grayOutRandomTiles(count);
+    if (a.type === 'fire_tiles') fr += igniteRandomTiles(count);
+  }
+  if (gr > 0) log(`Enemy special: ${gr} tile${gr>1?'s':''} turned gray.`);
+  if (fr > 0) log(`Enemy special: ${fr} tile${fr>1?'s':''} set ablaze.`);
+}
+
 // Environmental hazards (fire tiles)
 function countFireTiles() {
   let n = 0;
@@ -456,10 +478,13 @@ function gameLost() {
 // Combat
 function enemyAttack() {
   if (gameOver) return;
+
+  const hasSpecial = enemySpecial.every != null;
+  const isSpecial = hasSpecial && enemySpecial.countdown <= 1;
+
   let dmg = enemy.damageHalvesPerTurn; // in half-hearts
-  const wasCharging = enemyCharge.charging;
-  if (wasCharging) {
-    dmg *= 3;
+  if (isSpecial && enemy.special && enemy.special.damageMult) {
+    dmg *= enemy.special.damageMult;
   }
 
   if (nextEnemyAttackHalved) {
@@ -474,33 +499,32 @@ function enemyAttack() {
   const hearts = dmg / 2;
   const label = hearts === 0.5 ? '−½' : `−${hearts}`;
   floatDamage(playerHeartsEl, label, 'player');
-  if (wasCharging) {
-    log(`💢 Charged strike! ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 || hearts === 0.5 ? '' : 's'} damage.`);
+  if (isSpecial && enemy.special && enemy.special.damageMult && enemy.special.damageMult !== 1) {
+    log(`💢 Special strike! ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 || hearts === 0.5 ? '' : 's'} damage.`);
   } else {
     log(`Enemy strikes for ${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 ? '' : hearts === 0.5 ? '' : 's'}.`);
   }
   if (player.isDead()) { gameLost(); return; }
 
-  // Debuffs after attack
+  // Apply deterministic special actions (before hazards)
+  if (isSpecial && enemy.special && Array.isArray(enemy.special.actions)) {
+    applySpecialActions(enemy.special.actions);
+  }
+
+  // Debuffs after attack (random, if any configured)
   applyEnemyDebuffs();
 
   // Environmental: fire tiles deal damage
   applyFireHazard();
 
-  // Charge state progression
-  if (wasCharging) {
-    // Consumed charged attack; schedule next charge window
-    enemyCharge.charging = false;
-    enemyCharge.countdown = randInt(3, 5);
-    updateEnemyStatusUI();
-  } else {
-    // Count down towards next charge; announce when ready
-    enemyCharge.countdown -= 1;
-    if (enemyCharge.countdown <= 0) {
-      enemyCharge.charging = true;
-      log('IM CHARGING!');
-      updateEnemyStatusUI();
+  // Special countdown progression
+  if (hasSpecial) {
+    if (isSpecial) {
+      enemySpecial.countdown = enemySpecial.every;
+    } else {
+      enemySpecial.countdown -= 1;
     }
+    updateEnemyStatusUI();
   }
 }
 function playerAttack(word, attackHalves, healHalves) {
@@ -601,7 +625,7 @@ function resetGame() {
   currentEnemyIndex = (currentEnemyIndex + 1) % ENEMIES.length;
   enemy = createEnemy(ENEMIES[currentEnemyIndex]);
 
-  initEnemyCharge();
+  initEnemySpecial();
   updateEnemyStatusUI();
 
   renderHearts();
@@ -752,7 +776,7 @@ renderGrid();
 renderHearts();
 updateWordUI();
 initDictionary();
-initEnemyCharge();
+initEnemySpecial();
 updateEnemyStatusUI();
 log(`Enemy: ${enemy.name}.`);
 

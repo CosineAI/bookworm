@@ -25,5 +25,6 @@ export class Enemy extends Combatant {
     this.name = options.name || kind;
     this.desc = options.desc || '';
     this.debuffs = Array.isArray(options.debuffs) ? options.debuffs : [];
+    this.special = options.special || null; // { every, damageMult, actions: [{type, count}] }
   }
 }
