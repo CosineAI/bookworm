@@ -31,12 +31,12 @@ export const TILE_TYPE_PROBABILITIES = {
   // normal is implied as the remainder
 };
 
-// Long word bonus (applied to total attack)
-// threshold: words longer than this get a bonus
-// perExtraLetterHalves: additional half-hearts per letter beyond threshold (float allowed)
-export const LONG_WORD_BONUS = {
+// Long word multiplying bonus (applied to total attack)
+// threshold: words longer than this get the multiplier
+// multiplier: multiply total attack by this factor if length > threshold
+export const LONG_WORD_MULTIPLIER = {
   threshold: 6,
-  perExtraLetterHalves: 0.5, // +0.5 halves (= +0.25 heart) per letter beyond 6
+  multiplier: 1.5,
 };
 
 // Dictionary sources
