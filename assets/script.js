@@ -24,6 +24,7 @@ const newGameBtn = document.getElementById('newGameBtn');
 const logEl = document.getElementById('log');
 const mainEl = document.querySelector('main');
 const enemyStatusEl = document.getElementById('enemyStatus');
+const enemyNameEl = document.getElementById('enemyName');
 
 // Shop DOM
 const shopOverlay = document.getElementById('shopOverlay');
@@ -412,18 +413,47 @@ function log(line) {
   logEl.prepend(p);
 }
 
+function updateEnemyNameUI() {
+  if (!enemyNameEl) return;
+  enemyNameEl.textContent = enemy?.name ? enemy.name : 'Enemy';
+}
+
+function formatHearts(halves) {
+  const hearts = halves / 2;
+  if (hearts === 0.5) return '½ heart';
+  if (Number.isInteger(hearts)) return `${hearts} heart${hearts === 1 ? '' : 's'}`;
+  return `${hearts} hearts`;
+}
+
 function updateEnemyStatusUI() {
   if (!enemyStatusEl) return;
-  if (enemySpecial.every == null) {
-    enemyStatusEl.textContent = '—';
-    enemyStatusEl.classList.remove('charging');
-    return;
+
+  // Compute next-turn damage including special and poison
+  let halves = enemy?.damageHalvesPerTurn || 0;
+  const isSpecialNext = enemySpecial.every != null && enemySpecial.countdown <= 1;
+  if (isSpecialNext && enemy.special?.damageMult) {
+    halves *= enemy.special.damageMult;
   }
-  if (enemySpecial.every === 1) {
-    enemyStatusEl.textContent = 'Special each turn';
-  } else {
-    enemyStatusEl.textContent = `Special in ${enemySpecial.countdown}`;
+  if (nextEnemyAttackHalved) {
+    halves = Math.floor(halves / 2);
   }
+
+  // Compose action text for specials
+  let actionText = '';
+  if (isSpecialNext && Array.isArray(enemy.special?.actions)) {
+    const parts = [];
+    for (const a of enemy.special.actions) {
+      const count = Math.max(1, a.count | 0);
+      if (a.type === 'gray_tiles') parts.push(`turn ${count} tile${count>1?'s':''} gray`);
+      if (a.type === 'fire_tiles') parts.push(`turn ${count} tile${count>1?'s':''} fire`);
+    }
+    if (parts.length > 0) {
+      actionText = ' + ' + parts.join(' + ');
+    }
+  }
+
+  const msg = `Will deal ${formatHearts(halves)} next turn${actionText}`;
+  enemyStatusEl.textContent = msg;
   enemyStatusEl.classList.remove('charging');
 }
 
@@ -664,6 +694,7 @@ function submitWord() {
   if (poisonUsed) {
     nextEnemyAttackHalved = true;
     log('☠️ You applied poison: the enemy’s next attack will be halved.');
+    updateEnemyStatusUI();
   }
 
   clearSelection();
@@ -721,6 +752,7 @@ function resetGame() {
   enemy = createEnemy(ENEMIES[currentEnemyIndex]);
 
   initEnemySpecial();
+  updateEnemyNameUI();
   updateEnemyStatusUI();
 
   renderHearts();
@@ -839,6 +871,7 @@ renderHearts();
 updateWordUI();
 initDictionary();
 initEnemySpecial();
+updateEnemyNameUI();
 updateEnemyStatusUI();
 log(`Enemy: ${enemy.name}.`);
 
