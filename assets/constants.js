@@ -31,12 +31,12 @@ export const TILE_TYPE_PROBABILITIES = {
   // normal is implied as the remainder
 };
 
-// Long word multiplying bonus (applied to total attack)
-// threshold: words longer than this get the multiplier
-// multiplier: multiply total attack by this factor if length > threshold
-export const LONG_WORD_MULTIPLIER = {
+// Long word multiplying bonus (per letter over threshold)
+// threshold: words longer than this get a multiplier that scales per extra letter
+// perExtraMultiplier: additional multiplier per letter beyond threshold (e.g., 0.125 -> +12.5% per extra letter)
+export const LONG_WORD_SCALING = {
   threshold: 6,
-  multiplier: 1.5,
+  perExtraMultiplier: 0.125, // 12.5% per letter over 6 (10 letters -> 1 + 4*0.125 = 1.5x)
 };
 
 // Dictionary sources

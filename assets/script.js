@@ -1,5 +1,5 @@
 // Word Battle — Bookworm-like (Refactored to modules, ready for future mechanics)
-import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES, LONG_WORD_MULTIPLIER } from './constants.js';
+import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES, LONG_WORD_SCALING } from './constants.js';
 import { makeTile, badgeFor, effectDescription, setSpawnBias } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
 import { Combatant } from './combatants.js';
@@ -231,10 +231,12 @@ function computeAttackInfo() {
     attackHalvesFloat += countFireTiles();
   }
 
-  // Long word multiplying bonus: apply after per-letter effects and global additions
-  if (LONG_WORD_MULTIPLIER && typeof LONG_WORD_MULTIPLIER.threshold === 'number') {
-    if (letters > LONG_WORD_MULTIPLIER.threshold) {
-      const mult = Number(LONG_WORD_MULTIPLIER.multiplier || 1);
+  // Long word multiplying bonus: scale per letter beyond threshold
+  if (LONG_WORD_SCALING && typeof LONG_WORD_SCALING.threshold === 'number') {
+    const extra = Math.max(0, letters - LONG_WORD_SCALING.threshold);
+    if (extra > 0) {
+      const per = Number(LONG_WORD_SCALING.perExtraMultiplier || 0);
+      const mult = 1 + per * extra;
       attackHalvesFloat *= mult;
     }
   }
@@ -644,6 +646,14 @@ const ITEM_POOL = [
     apply: () => { setSpawnBias({ poison: 2 }); } },
   { key: 'blessCursed', name: 'Blessing of Cursed', desc: 'Cursed tiles appear twice as often.',
     apply: () => { setSpawnBias({ cursed: 2 }); } },
+
+  // New permanent HP items
+  { key: 'metaphorMail', name: 'Metaphor Mail', desc: '+3 max hearts (permanent).',
+    apply: () => { player.maxHearts += 3; renderHearts(); } },
+  { key: 'simileShield', name: 'Simile Shield', desc: '+2 max hearts (permanent).',
+    apply: () => { player.maxHearts += 2; renderHearts(); } },
+  { key: 'personificationPlate', name: 'Personification Plate', desc: '+2 max hearts (permanent).',
+    apply: () => { player.maxHearts += 2; renderHearts(); } },
 ];
 
 let shopItems = [];
