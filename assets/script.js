@@ -1,6 +1,6 @@
 // Word Battle — Bookworm-like (Refactored to modules, ready for future mechanics)
 import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES, LONG_WORD_SCALING } from './constants.js';
-import { makeTile, badgeFor, effectDescription, setSpawnBias } from './tiles.js';
+import { makeTile, badgeFor, effectDescription, setSpawnBias, resetSpawnBias } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
 import { Combatant } from './combatants.js';
 import { letterDamageHalves } from './letters.js';
@@ -56,26 +56,6 @@ let selectedSet = new Set();
 let gameOver = false;
 let refillAnimSet = new Set(); // positions to animate falling when refilled
 
-// Equipment tracking
-let equippedItems = [];
-function renderEquipment() {
-  if (!equipmentListEl) return;
-  equipmentListEl.innerHTML = '';
-  if (!equippedItems || equippedItems.length === 0) {
-    const none = document.createElement('span');
-    none.className = 'muted';
-    none.textContent = '—';
-    equipmentListEl.appendChild(none);
-    return;
-  }
-  for (const it of equippedItems) {
-    const pill = document.createElement('span');
-    pill.className = 'pill';
-    pill.textContent = it.name;
-    equipmentListEl.appendChild(pill);
-  }
-}
-
 // Run statistics across battles (reset when starting a new run)
 const runStats = {
   longestWord: '',
@@ -116,6 +96,30 @@ function showRunStats(title = 'Run stats') {
   log(`• Longest word: ${runStats.longestWord ? runStats.longestWord.toUpperCase() : '(none)'} (${runStats.longestLen})`);
   log(`• Highest attack: ${runStats.highestAttackWord ? runStats.highestAttackWord.toUpperCase() : '(none)'} (${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 || hearts === 0.5 ? '' : 's'})`);
   log(`• Most effects: ${runStats.mostEffectsWord ? runStats.mostEffectsWord.toUpperCase() : '(none)'} (${runStats.mostEffectsCount})`);
+}
+
+// Equipment reset for new runs
+function resetItemsAndEffects() {
+  // Reset active effects
+  activeEffects.holyVowel = false;
+  activeEffects.fireproof = false;
+  activeEffects.healingStaff = false;
+  activeEffects.redEnhanced = false;
+  activeEffects.grayGoggles = false;
+  activeEffects.fireWarAxe = false;
+
+  // Reset spawn biases from blessings
+  resetSpawnBias();
+
+  // Clear equipped items list and UI
+  equippedItems = [];
+  renderEquipment();
+
+  // Reset max hearts to base and clamp current HP
+  player.maxHearts = PLAYER_MAX_HEARTS;
+  const maxHalves = player.maxHearts * HALF;
+  if (player.hp > maxHalves) player.hp = maxHalves;
+  renderHearts();
 }
 
 function openEnding() {
@@ -829,6 +833,34 @@ function resetGame() {
   log(`New game started. Enemy: ${enemy.name}.`);
 }
 
+function startNewRun() {
+  // Begin a fresh run at the first enemy; reset items/effects
+  gameOver = false;
+  clearRunStats();
+  resetItemsAndEffects();
+  nextEnemyAttackHalved = false;
+
+  currentEnemyIndex = 0;
+  enemy = createEnemy(ENEMIES[currentEnemyIndex]);
+
+  initEnemySpecial();
+  updateEnemyNameUI();
+  updateEnemyStatusUI();
+
+  selected = [];
+  selectedSet.clear();
+  initGrid();
+  renderGrid();
+  renderHearts();
+  updateWordUI();
+  message('');
+  submitBtn.disabled = false;
+  shuffleBtn.disabled = false;
+  newGameBtn.style.display = 'none';
+  logEl.innerHTML = '';
+  log(`New run started. Enemy: ${enemy.name}.`);
+}
+
 
 
 // Items are now provided by items.js
@@ -917,7 +949,7 @@ function equipItem(index) {
 submitBtn.addEventListener('click', submitWord);
 clearBtn.addEventListener('click', clearSelection);
 shuffleBtn.addEventListener('click', shuffleGrid);
-newGameBtn.addEventListener('click', () => { clearRunStats(); resetGame(); });
+newGameBtn.addEventListener('click', () => { startNewRun(); });
 
 // Shop events
 healBtn.addEventListener('click', selectHeal);
@@ -931,8 +963,7 @@ continueBtn.addEventListener('click', () => {
 
 endingRestartBtn.addEventListener('click', () => {
   closeEnding();
-  clearRunStats();
-  resetGame();
+  startNewRun();
 });
 
 // Kick off
