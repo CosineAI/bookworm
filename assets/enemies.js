@@ -84,6 +84,23 @@ export const ENEMIES = [
     damageHalvesPerTurn: 3, // 1½ hearts
     debuffs: [],
     special: { every: 1, damageMult: 1, actions: [{ type: 'fire_tiles', count: 1 }] } // 1 fire every turn
+  },
+  // Hard enemies
+  {
+    name: 'Archdragon',
+    kind: 'archdragon',
+    maxHearts: 10,
+    damageHalvesPerTurn: 6, // 3 hearts per turn
+    debuffs: [],
+    special: { every: 1, damageMult: 1, actions: [{ type: 'fire_tiles', count: 2 }] } // adds 2 fire each turn
+  },
+  {
+    name: 'Cursed Dragonlord',
+    kind: 'dragonlord',
+    maxHearts: 10,
+    damageHalvesPerTurn: 4, // 2 hearts per turn
+    debuffs: [],
+    special: { every: 1, damageMult: 1, actions: [{ type: 'gray_tiles', count: 2 }] } // turns 2 tiles gray each turn
   }
 ];
 
