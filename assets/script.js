@@ -5,6 +5,7 @@ import { loadEnglishDictionary } from './dictionary.js';
 import { Combatant } from './combatants.js';
 import { letterDamageHalves } from './letters.js';
 import { ENEMIES, createEnemy } from './enemies.js';
+import { createItemPool } from './items.js';
 
 // DOM
 const gridEl = document.getElementById('grid');
@@ -44,6 +45,48 @@ let selected = [];         // array of {r, c}
 let selectedSet = new Set();
 let gameOver = false;
 let refillAnimSet = new Set(); // positions to animate falling when refilled
+
+// Run statistics across battles (reset when starting a new run)
+const runStats = {
+  longestWord: '',
+  longestLen: 0,
+  highestAttackWord: '',
+  highestAttackHalves: 0,
+  mostEffectsWord: '',
+  mostEffectsCount: 0,
+};
+function clearRunStats() {
+  runStats.longestWord = '';
+  runStats.longestLen = 0;
+  runStats.highestAttackWord = '';
+  runStats.highestAttackHalves = 0;
+  runStats.mostEffectsWord = '';
+  runStats.mostEffectsCount = 0;
+}
+function updateStats(word, attackHalves, effects) {
+  if (!word) return;
+  const len = word.length;
+  if (len > runStats.longestLen) {
+    runStats.longestLen = len;
+    runStats.longestWord = word;
+  }
+  if (attackHalves > runStats.highestAttackHalves) {
+    runStats.highestAttackHalves = attackHalves;
+    runStats.highestAttackWord = word;
+  }
+  const effectCount = effects ? (effects instanceof Set ? effects.size : effects.length || 0) : 0;
+  if (effectCount > runStats.mostEffectsCount) {
+    runStats.mostEffectsCount = effectCount;
+    runStats.mostEffectsWord = word;
+  }
+}
+function showRunStats(title = 'Run stats') {
+  log(`— ${title} —`);
+  const hearts = (runStats.highestAttackHalves || 0) / 2;
+  log(`• Longest word: ${runStats.longestWord ? runStats.longestWord.toUpperCase() : '(none)'} (${runStats.longestLen})`);
+  log(`• Highest attack: ${runStats.highestAttackWord ? runStats.highestAttackWord.toUpperCase() : '(none)'} (${hearts === 0.5 ? '½' : hearts} heart${hearts === 1 || hearts === 0.5 ? '' : 's'})`);
+  log(`• Most effects: ${runStats.mostEffectsWord ? runStats.mostEffectsWord.toUpperCase() : '(none)'} (${runStats.mostEffectsCount})`);
+}
 
 // Enemy special cadence state
 let enemySpecial = { every: null, countdown: null };
@@ -153,12 +196,19 @@ function getCurrentWord() {
 }
 
 function computeAttackInfo() {
-  // returns { attackHalves, healHalves, letters }
+  // returns { attackHalves, healHalves, letters, effects }
   let attackHalvesFloat = 0;
   let healHalves = 0;
   const letters = selected.length;
   const vowels = new Set(['A','E','I','O','U']);
   let cursedCount = 0;
+  const effects = new Set();
+  let usedHolyVowel = false;
+  let usedRed = false;
+  let usedGray = false;
+  let usedFireTile = false;
+  let usedPoison = false;
+  let usedCursed = false;
 
   for (const p of selected) {
     const cell = grid[p.r][p.c];
@@ -166,6 +216,17 @@ function computeAttackInfo() {
     const base = letterDamageHalves(cell.ch);
     let contribution = base / 2; // halve letter damage
     const isVowel = vowels.has(String(cell.ch).toUpperCase());
+
+    // Effect markers based on selection
+    if (isVowel && activeEffects.holyVowel) usedHolyVowel = true;
+    switch (cell.type) {
+      case TILE_TYPES.RED: usedRed = true; break;
+      case TILE_TYPES.GRAY: usedGray = true; break;
+      case TILE_TYPES.FIRE: usedFireTile = true; break;
+      case TILE_TYPES.POISON: usedPoison = true; break;
+      case TILE_TYPES.CURSED: usedCursed = true; break;
+      default: break;
+    }
 
     switch (cell.type) {
       case TILE_TYPES.RED:
@@ -227,14 +288,19 @@ function computeAttackInfo() {
   if (cursedCount > 0) {
     if (cursedCount % 2 === 1) {
       attackHalvesFloat *= 0.5; // odd count halves total attack
+      effects.add('cursed_odd');
     } else {
       attackHalvesFloat *= 1.5; // even count boosts total by x1.5
+      effects.add('cursed_even');
     }
+    effects.add('cursed');
   }
 
   // Firey War Axe: add ½ heart per fire tile on the field (in halves)
   if (activeEffects.fireWarAxe) {
-    attackHalvesFloat += countFireTiles();
+    const fireTilesOnField = countFireTiles();
+    if (fireTilesOnField > 0) effects.add('fire_war_axe');
+    attackHalvesFloat += fireTilesOnField;
   }
 
   // Long word multiplying bonus: scale per letter beyond threshold
@@ -243,12 +309,26 @@ function computeAttackInfo() {
     if (extra > 0) {
       const per = Number(LONG_WORD_SCALING.perExtraMultiplier || 0);
       const mult = 1 + per * extra;
+      effects.add('long_word_scaling');
       attackHalvesFloat *= mult;
     }
   }
 
+  // Post-process effect tags from markers
+  if (usedRed) {
+    effects.add('red');
+    if (activeEffects.redEnhanced) effects.add('red_enhanced');
+  }
+  if (usedGray) {
+    effects.add('gray');
+    if (activeEffects.grayGoggles) effects.add('gray_goggles');
+  }
+  if (usedFireTile) effects.add('fire');
+  if (usedPoison) effects.add('poison');
+  if (usedHolyVowel) effects.add('holy_vowel');
+
   const attackHalves = Math.round(attackHalvesFloat); // nearest ½ heart
-  return { attackHalves, healHalves, letters };
+  return { attackHalves, healHalves, letters, effects: Array.from(effects) };
 }
 
 function updateWordUI() {
@@ -458,13 +538,19 @@ function applyFireHazard() {
 // Game end
 function gameWon() {
   gameOver = true;
-  message('You win! Enemy defeated.', '');
+  const isFinal = currentEnemyIndex === ENEMIES.length - 1;
+  message(isFinal ? 'You win! Final enemy defeated.' : 'You win! Enemy defeated.', '');
   log('🏆 Victory! You defeated the enemy.');
   submitBtn.disabled = true;
   shuffleBtn.disabled = true;
 
-  // Open shop between battles
-  openShop();
+  if (isFinal) {
+    showRunStats('Final run stats');
+    newGameBtn.style.display = 'inline-block';
+  } else {
+    // Open shop between battles
+    openShop();
+  }
 }
 
 function gameLost() {
@@ -473,6 +559,7 @@ function gameLost() {
   log('💀 Defeat. The enemy outlasted you.');
   submitBtn.disabled = true;
   shuffleBtn.disabled = true;
+  showRunStats('Run stats');
   newGameBtn.style.display = 'inline-block';
 }
 
@@ -567,7 +654,10 @@ function submitWord() {
   }
   message('');
   const used = [...selected];
-  const { attackHalves, healHalves } = computeAttackInfo();
+  const { attackHalves, healHalves, effects } = computeAttackInfo();
+
+  // Update run stats for this attack
+  updateStats(w, attackHalves, effects);
 
   // Poison: if any selected tile is poison, halve enemy's next attack
   const poisonUsed = used.some(({r, c}) => grid[r][c].type === TILE_TYPES.POISON);
@@ -623,7 +713,11 @@ function resetGame() {
   nextEnemyAttackHalved = false;
 
   // Advance to the next enemy for increasing difficulty
+  const wasLast = currentEnemyIndex === ENEMIES.length - 1;
   currentEnemyIndex = (currentEnemyIndex + 1) % ENEMIES.length;
+  if (wasLast && currentEnemyIndex === 0) {
+    clearRunStats(); // new run started
+  }
   enemy = createEnemy(ENEMIES[currentEnemyIndex]);
 
   initEnemySpecial();
@@ -645,51 +739,17 @@ function resetGame() {
 
 
 
-// Items
-const ITEM_POOL = [
-  { key: 'holyVowel', name: 'Holy Vowel', desc: 'Double attack for vowels (A, E, I, O, U).',
-    apply: () => { activeEffects.holyVowel = true; } },
-  { key: 'fireproof', name: 'Fireproof', desc: 'Fire tiles deal half damage (rounded down).',
-    apply: () => { activeEffects.fireproof = true; } },
-  { key: 'healingStaff', name: 'Healing Staff', desc: 'Green tiles heal a full heart.',
-    apply: () => { activeEffects.healingStaff = true; } },
-  { key: 'redEnhanced', name: 'Reddy For Action', desc: 'Red tiles deal an additional double damage.',
-    apply: () => { activeEffects.redEnhanced = true; } },
-  { key: 'grayGoggles', name: 'Gray Goggles', desc: 'Gray tiles deal half damage.',
-    apply: () => { activeEffects.grayGoggles = true; } },
-  { key: 'fireWarAxe', name: 'Firey War Axe', desc: 'Adds ½ heart damage per fire tile on the field to each attack.',
-    apply: () => { activeEffects.fireWarAxe = true; } },
-  { key: 'blessRed', name: 'Blessing of Red', desc: 'Red tiles appear twice as often.',
-    apply: () => { setSpawnBias({ red: 2 }); } },
-  { key: 'blessGreen', name: 'Blessing of Green', desc: 'Green tiles appear twice as often.',
-    apply: () => { setSpawnBias({ green: 2 }); } },
-  { key: 'blessGray', name: 'Blessing of Gray', desc: 'Gray tiles appear twice as often.',
-    apply: () => { setSpawnBias({ gray: 2 }); } },
-  { key: 'blessFire', name: 'Blessing of Fire', desc: 'Fire tiles appear twice as often.',
-    apply: () => { setSpawnBias({ fire: 2 }); } },
-  { key: 'blessPoison', name: 'Blessing of Poison', desc: 'Poison tiles appear twice as often.',
-    apply: () => { setSpawnBias({ poison: 2 }); } },
-  { key: 'blessCursed', name: 'Blessing of Cursed', desc: 'Cursed tiles appear twice as often.',
-    apply: () => { setSpawnBias({ cursed: 2 }); } },
-
-  // New permanent HP items
-  { key: 'metaphorMail', name: 'Metaphor Mail', desc: '+3 max hearts (permanent).',
-    apply: () => { player.maxHearts += 3; renderHearts(); } },
-  { key: 'simileShield', name: 'Simile Shield', desc: '+2 max hearts (permanent).',
-    apply: () => { player.maxHearts += 2; renderHearts(); } },
-  { key: 'personificationPlate', name: 'Personification Plate', desc: '+2 max hearts (permanent).',
-    apply: () => { player.maxHearts += 2; renderHearts(); } },
-];
+// Items are now provided by items.js
 
 let shopItems = [];
 
-function pickRandomItems(n = 2) {
-  const pool = [...ITEM_POOL];
-  for (let i = pool.length - 1; i > 0; i--) {
+function pickRandomItems(pool, n = 2) {
+  const copy = [...pool];
+  for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+    [copy[i], copy[j]] = [copy[j], copy[i]];
   }
-  return pool.slice(0, n);
+  return copy.slice(0, n);
 }
 
 function renderShopItems() {
@@ -702,7 +762,8 @@ function renderShopItems() {
 
 function openShop() {
   shopSelectionMade = false;
-  shopItems = pickRandomItems(2);
+  const pool = createItemPool({ activeEffects, setSpawnBias, player, renderHearts });
+  shopItems = pickRandomItems(pool, 2);
   renderShopItems();
 
   healBtn.disabled = false;
@@ -759,7 +820,7 @@ function equipItem(index) {
 submitBtn.addEventListener('click', submitWord);
 clearBtn.addEventListener('click', clearSelection);
 shuffleBtn.addEventListener('click', shuffleGrid);
-newGameBtn.addEventListener('click', resetGame);
+newGameBtn.addEventListener('click', () => { clearRunStats(); resetGame(); });
 
 // Shop events
 healBtn.addEventListener('click', selectHeal);
