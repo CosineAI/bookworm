@@ -469,20 +469,36 @@ function refillUsedTiles(used) {
 
 // Hearts and messaging
 function heartsString(currentHalves, maxHearts) {
+  // Legacy helper retained (unused now) — kept for minimal diff and potential future fallback
   let s = '';
   const full = Math.floor(currentHalves / 2);
   const half = currentHalves % 2;
-  for (let i=0; i<maxHearts; i++) {
-    if (i < full) s += '❤️';
+  for (let i=0; i&lt;maxHearts; i++) {
+    if (i &lt; full) s += '❤️';
     else if (i === full && half) s += '💔';
     else s += '🤍';
   }
   return s;
 }
 
+function renderHeartsTo(el, currentHalves, maxHearts) {
+  if (!el) return;
+  el.innerHTML = '';
+  const full = Math.floor(currentHalves / 2);
+  const half = currentHalves % 2;
+  for (let i = 0; i &lt; maxHearts; i++) {
+    const span = document.createElement('span');
+    span.className = 'heart';
+    if (i &lt; full) span.classList.add('full');
+    else if (i === full && half) span.classList.add('half');
+    else span.classList.add('empty');
+    el.appendChild(span);
+  }
+}
+
 function renderHearts() {
-  playerHeartsEl.textContent = heartsString(player.hp, player.maxHearts);
-  enemyHeartsEl.textContent = heartsString(enemy.hp, enemy.maxHearts);
+  renderHeartsTo(playerHeartsEl, player.hp, player.maxHearts);
+  renderHeartsTo(enemyHeartsEl, enemy.hp, enemy.maxHearts);
 }
 
 function message(text, kind='') {

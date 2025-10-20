@@ -90,6 +90,37 @@ footer {
   white-space: nowrap;
 }
 
+/* Render hearts with true half-fill using layered emoji and clipping */
+.hearts {
+  display: inline-flex;
+  gap: 4px;
+  letter-spacing: 0; /* spacing now handled by gap */
+}
+.heart {
+  position: relative;
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  line-height: 1;
+}
+.heart::before,
+.heart::after {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.heart.empty::before { content: '🤍'; }
+.heart.full::before { content: '❤️'; }
+/* Half: base is empty heart, overlay left half of red heart */
+.heart.half::before { content: '🤍'; }
+.heart.half::after {
+  content: '❤️';
+  /* show left half */
+  clip-path: inset(0 50% 0 0);
+}
+
 /* Full-width status bar above the grid with fixed height to avoid content shifts */
 .statusbar {
   display: flex;
