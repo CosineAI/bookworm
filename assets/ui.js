@@ -142,7 +142,8 @@ export function updateWordUI() {
   letterCountEl.textContent = String(letters);
   attackValEl.textContent = String(attackHalves);
   attackDisplayEl.textContent = String(attackHalves);
-  submitBtn.disabled = state.gameOver || letters < 2;
+  const dictReady = !!state.dictionarySet;
+  submitBtn.disabled = state.gameOver || !dictReady || letters < 2;
 }
 
 // Accessibility keyboard helpers
@@ -155,6 +156,9 @@ export function attachGridKeyboard() {
         const ev = new CustomEvent('grid:tile-click', { detail: { r, c } });
         window.dispatchEvent(ev);
       }
+    }
+  });
+}
     }
   });
 }

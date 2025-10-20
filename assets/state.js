@@ -3,15 +3,6 @@ import { Combatant } from './combatants.js';
 import { PLAYER_MAX_HEARTS, HALF } from './constants.js';
 import { ENEMIES, createEnemy } from './enemies.js';
 
-// Small built-in fallback dictionary to allow immediate play
-const BUILTIN_SMALL_SET = new Set([
-  'a','an','and','are','as','at','be','by','can','do','for','go','had','has','have','he','her','him','his','i',
-  'in','is','it','like','man','me','my','no','not','of','on','one','or','our','out','said','see','she','so',
-  'the','their','them','then','there','they','this','to','two','up','use','was','we','well','were','what',
-  'when','which','who','will','with','word','work','would','year','you','your','red','blue','green','day',
-  'boy','girl','dog','cat','run','walk','play','read','write','big','small','good','bad'
-]);
-
 export const state = {
   player: new Combatant(PLAYER_MAX_HEARTS),
   currentEnemyIndex: 0,
@@ -53,8 +44,8 @@ export const state = {
   nextEnemyAttackHalved: false,
   enemySpecial: { every: null, countdown: null },
 
-  // Dictionary
-  dictionarySet: BUILTIN_SMALL_SET,
+  // Dictionary: null until loaded successfully
+  dictionarySet: null,
 };
 
 export function setDictionarySet(set) {

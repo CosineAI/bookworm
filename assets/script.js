@@ -13,6 +13,7 @@ import {
   equipItem2Btn,
   continueBtn,
   endingRestartBtn,
+  dictStatusEl,
 } from './dom.js';
 import { state, setDictionarySet, initEnemySpecial } from './state.js';
 import { renderHearts, updateEnemyNameUI, updateEnemyStatusUI, renderEquipment, log, renderLog, message, updateWordUI, attachGridKeyboard } from './ui.js';
@@ -30,18 +31,17 @@ function isValidWord(w) {
 }
 
 async function initDictionary() {
-  submitBtn.disabled = false;
-  console.log('[Dictionary] Loading… fallback active until remote dictionary is ready.');
+  // Keep Attack disabled until the dictionary is loaded
+  if (dictStatusEl) dictStatusEl.textContent = 'Loading dictionary…';
   try {
     const res = await loadEnglishDictionary();
     setDictionarySet(res.set);
-    if (res.isFallback) {
-      console.warn(`[Dictionary] Fallback loaded: ${res.info}`);
-    } else {
-      console.log(`[Dictionary] Loaded: ${res.info}`);
-    }
+    if (dictStatusEl) dictStatusEl.textContent = res.info || 'Dictionary loaded';
+    updateWordUI(); // re-evaluate button disabled state
   } catch (e) {
-    console.warn('[Dictionary] Fetch failed. Using built-in fallback list.', e && e.message ? e.message : '');
+    if (dictStatusEl) dictStatusEl.textContent = 'Error accessing word database';
+    message('Failed to load dictionary. Please check your connection.', 'bad');
+    // Attack remains disabled because dictionarySet is null
   }
 }
 
