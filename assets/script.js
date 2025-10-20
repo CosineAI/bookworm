@@ -796,12 +796,11 @@ function isValidWord(w) {
   if (!w || w.length < 2) return false;
   // Always check against the currently active dictionary (remote, local, or built-in)
   return dictionarySet ? dictionarySet.has(w) : false;
-}
-
+}>
 // Dictionary loading (non-blocking: play allowed via fallback while it loads)
+// UI status is not shown; we log to the browser console only.
 async function initDictionary() {
-  dictStatusEl.textContent = 'Loading dictionary… fallback active';
-  dictStatusEl.classList.add('pill');
+  submitBtn.disabled = false; // enable');
   submitBtn.disabled = false; // enable with built-in fallback immediately
 
   try {
