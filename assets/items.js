@@ -41,6 +41,8 @@ export function createItemPool(ctx) {
       apply: () => { safeSetSpawnBias({ poison: 3 }); } },
     { key: 'blessCursed', name: 'Blessing of Cursed', desc: 'Cursed tiles appear three times as often.',
       apply: () => { safeSetSpawnBias({ cursed: 3 }); } },
+    { key: 'blessIce', name: 'Blessing of Ice', desc: 'Frozen tiles appear three times as often.',
+      apply: () => { safeSetSpawnBias({ frozen: 3 }); } },
 
     // Permanent max-heart upgrades
     { key: 'metaphorMail', name: 'Metaphor Mail', desc: '+3 max hearts (permanent).',
@@ -49,5 +51,9 @@ export function createItemPool(ctx) {
       apply: () => { player.maxHearts += 2; safeRenderHearts(); } },
     { key: 'personificationPlate', name: 'Personification Plate', desc: '+2 max hearts (permanent).',
       apply: () => { player.maxHearts += 2; safeRenderHearts(); } },
+
+    // Defensive item
+    { key: 'frozenArmor', name: 'Frozen Armor', desc: 'Prevent ½ heart of damage for each Frozen tile on the grid.',
+      apply: () => { activeEffects.frozenArmor = true; } },
   ];
 }

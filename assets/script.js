@@ -180,6 +180,7 @@ const activeEffects = {
   redEnhanced: false,
   grayGoggles: false,
   fireWarAxe: false,
+  frozenArmor: false, // reduces incoming enemy damage by ½ per frozen tile on the grid
 };
 let shopSelectionMade = false;
 
@@ -305,6 +306,7 @@ function computeAttackInfo() {
   let usedFireTile = false;
   let usedPoison = false;
   let usedCursed = false;
+  let usedFrozen = false;
 
   for (const p of selected) {
     const cell = grid[p.r][p.c];
@@ -321,6 +323,7 @@ function computeAttackInfo() {
       case TILE_TYPES.FIRE: usedFireTile = true; break;
       case TILE_TYPES.POISON: usedPoison = true; break;
       case TILE_TYPES.CURSED: usedCursed = true; break;
+      case TILE_TYPES.FROZEN: usedFrozen = true; break;
       default: break;
     }
 
@@ -372,6 +375,12 @@ function computeAttackInfo() {
         cursedCount += 1;
         break;
       }
+      case TILE_TYPES.FROZEN: {
+        let mult = 1;
+        if (activeEffects.holyVowel && isVowel) mult *= 2;
+        attackHalvesFloat += contribution * mult; // frozen contributes as normal; total halved later
+        break;
+      }
       default: {
         let mult = 1;
         if (activeEffects.holyVowel && isVowel) mult *= 2;
@@ -408,6 +417,12 @@ function computeAttackInfo() {
       effects.add('long_word_scaling');
       attackHalvesFloat *= mult;
     }
+  }
+
+  // Frozen: halve the total attack this turn if any frozen tile used
+  if (usedFrozen) {
+    attackHalvesFloat *= 0.5;
+    effects.add('frozen');
   }
 
   // Post-process effect tags from markers
@@ -669,6 +684,17 @@ function countFireTiles() {
   return n;
 }
 
+// Frozen tiles on field
+function countFrozenTiles() {
+  let n = 0;
+  for (let r=0; r<GRID_SIZE; r++) {
+    for (let c=0; c<GRID_SIZE; c++) {
+      if (grid[r][c].type === TILE_TYPES.FROZEN) n++;
+    }
+  }
+  return n;
+}
+
 function applyFireHazard() {
   const count = countFireTiles();
   if (count <= 0) return;
@@ -731,6 +757,19 @@ function enemyAttack() {
     dmg = Math.floor(dmg / 2);
     nextEnemyAttackHalved = false;
     log(`☠️ Enemy is poisoned: attack halved from ${original/2} to ${dmg/2} heart${dmg/2===1?'':'s'}.`);
+  }
+
+  // Frozen Armor: reduce damage by ½ per frozen tile on the board
+  if (activeEffects.frozenArmor) {
+    const frozenOnField = countFrozenTiles();
+    if (frozenOnField > 0) {
+      const before = dmg;
+      dmg = Math.max(0, dmg - frozenOnField);
+      const reducedHearts = (before - dmg) / 2;
+      if (reducedHearts > 0) {
+        log(`🛡️ Frozen Armor reduces incoming damage by ${reducedHearts === 0.5 ? '½' : reducedHearts} heart${reducedHearts === 1 || reducedHearts === 0.5 ? '' : 's'}.`);
+      }
+    }
   }
 
   player.takeDamage(dmg);
@@ -818,10 +857,21 @@ function submitWord() {
     updateEnemyStatusUI();
   }
 
+  // Frozen: if used, enemy skips their turn (including special). The attack was already halved in compute.
+  const frozenUsed = used.some(({r, c}) => grid[r][c].type === TILE_TYPES.FROZEN);
+
   clearSelection();
   const ended = playerAttack(w, attackHalves, healHalves);
   refillUsedTiles(used);
-  if (!ended) enemyAttack();
+  if (!ended) {
+    if (frozenUsed) {
+      log('❄️ Frozen tiles used: the enemy skips their turn.');
+      // Do not call enemyAttack(); countdown and hazards do not progress this turn.
+      updateEnemyStatusUI();
+    } else {
+      enemyAttack();
+    }
+  }
 }
 
 function isValidWord(w) {

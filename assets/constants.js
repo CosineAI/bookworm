@@ -18,6 +18,7 @@ export const TILE_TYPES = {
   FIRE: 'fire',   // environmental damage each turn
   POISON: 'poison', // halves enemy's next attack when used
   CURSED: 'cursed', // odd count halves total attack; even count x1.5
+  FROZEN: 'frozen', // halves player's total attack but skips enemy's turn when used
 };
 
 export const TILE_TYPE_PROBABILITIES = {
@@ -28,6 +29,7 @@ export const TILE_TYPE_PROBABILITIES = {
   fire: 0.04,
   poison: 0.04,
   cursed: 0.04,
+  frozen: 0.04,
   // normal is implied as the remainder
 };
 
