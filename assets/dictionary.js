@@ -18,26 +18,19 @@ async function tryLoadFrom(url) {
 }
 
 export async function loadEnglishDictionary(urls = DICT_URLS) {
-  // Try local dictionaries first
-  const LOCAL_PATHS = [
-    './assets/words.txt',            // newly added large local dictionary
-    './assets/fallback-words.txt',   // existing fallback
-  ];
-
-  for (const path of LOCAL_PATHS) {
-    try {
-      const set = await tryLoadFrom(path);
-      return {
-        set,
-        isFallback: true,
-        info: `Local dictionary loaded (${set.size.toLocaleString()} words)`
-      };
-    } catch {
-      // try next local path
-    }
+  // 1) Prefer local large dictionary
+  try {
+    const set = await tryLoadFrom('./assets/words.txt');
+    return {
+      set,
+      isFallback: true,
+      info: `Local dictionary loaded (${set.size.toLocaleString()} words)`
+    };
+  } catch {
+    // continue to remote sources
   }
 
-  // Fall back to remote sources
+  // 2) Try remote sources
   for (const url of urls) {
     try {
       const set = await tryLoadFrom(url);
@@ -49,6 +42,18 @@ export async function loadEnglishDictionary(urls = DICT_URLS) {
     } catch {
       // try next URL
     }
+  }
+
+  // 3) Finally, fallback to bundled small list
+  try {
+    const set = await tryLoadFrom('./assets/fallback-words.txt');
+    return {
+      set,
+      isFallback: true,
+      info: `Fallback dictionary loaded (${set.size.toLocaleString()} words)`
+    };
+  } catch {
+    // no more options
   }
 
   throw new Error('Unable to load dictionary from local or remote sources.');
