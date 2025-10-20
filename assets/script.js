@@ -898,21 +898,43 @@ function pickRandomItems(pool, n = 2) {
 
 function renderShopItems() {
   const [a, b] = shopItems;
-  item1NameEl.textContent = a.name;
-  item1DescEl.textContent = a.desc;
-  item2NameEl.textContent = b.name;
-  item2DescEl.textContent = b.desc;
+
+  // Item 1
+  if (a) {
+    item1NameEl.textContent = a.name;
+    item1DescEl.textContent = a.desc;
+    equipItem1Btn.disabled = false;
+  } else {
+    item1NameEl.textContent = 'Sold out';
+    item1DescEl.textContent = 'No items available.';
+    equipItem1Btn.disabled = true;
+  }
+
+  // Item 2
+  if (b) {
+    item2NameEl.textContent = b.name;
+    item2DescEl.textContent = b.desc;
+    equipItem2Btn.disabled = false;
+  } else {
+    item2NameEl.textContent = 'Sold out';
+    item2DescEl.textContent = 'No items available.';
+    equipItem2Btn.disabled = true;
+  }
 }
 
 function openShop() {
   shopSelectionMade = false;
-  const pool = createItemPool({ activeEffects, setSpawnBias, player, renderHearts });
-  shopItems = pickRandomItems(pool, 2);
+
+  // Build item pool and remove already equipped items (one quantity per run)
+  const poolAll = createItemPool({ activeEffects, setSpawnBias, player, renderHearts });
+  const owned = new Set((equippedItems || []).map(it => it.key));
+  const pool = poolAll.filter(item => !owned.has(item.key));
+
+  // Pick up to 2 from the filtered pool; fall back to unfiltered if empty to avoid UI breakage
+  shopItems = pickRandomItems(pool.length > 0 ? pool : poolAll, 2);
   renderShopItems();
 
   healBtn.disabled = false;
-  equipItem1Btn.disabled = false;
-  equipItem2Btn.disabled = false;
 
   shopOverlay.classList.add('show');
   shopOverlay.setAttribute('aria-hidden', 'false');

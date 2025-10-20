@@ -55,10 +55,10 @@ footer {
 
 .hud {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr 1fr; /* left and right only */
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: .6rem;
 }
 .hud-side {
   display: flex;
@@ -90,11 +90,21 @@ footer {
   white-space: nowrap;
 }
 
-.hud-center {
+/* Full-width status bar above the grid with fixed height to avoid content shifts */
+.statusbar {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: .5rem;
+  gap: .6rem;
+  height: 56px; /* fixed height */
+  margin: .2rem 0 .8rem 0;
+  padding: .4rem .6rem;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+.statusbar .message {
+  flex: 1;
+  text-align: center;
 }
 
 /* Equipment list */
