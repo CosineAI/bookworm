@@ -346,6 +346,23 @@ footer {
   color: white;
 }
 
+/* Hard/Extreme styles */
+.btn.warning {
+  background: #b91c1c; /* red */
+  color: #fff;
+}
+.btn.danger {
+  background: #7f1d1d; /* deeper red */
+  color: #fff;
+  box-shadow: 0 0 0 rgba(185, 28, 28, 0.0), 0 2px 6px rgba(0,0,0,0.15);
+  animation: glowPulse 2.2s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%   { box-shadow: 0 0 0 rgba(185,28,28,0.0), 0 2px 6px rgba(0,0,0,0.15); }
+  50%  { box-shadow: 0 0 16px rgba(239,68,68,0.55), 0 6px 18px rgba(0,0,0,0.20); }
+  100% { box-shadow: 0 0 0 rgba(185,28,28,0.0), 0 2px 6px rgba(0,0,0,0.15); }
+}
+
 .log {
   margin-top: 1.0rem;
   padding-top: .5rem;
