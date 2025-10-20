@@ -14,6 +14,8 @@ import {
   continueBtn,
   endingRestartBtn,
   dictStatusEl,
+  hardModeBtn,
+  extremeModeBtn,
 } from './dom.js';
 import { state, setDictionarySet, initEnemySpecial } from './state.js';
 import { renderHearts, updateEnemyNameUI, updateEnemyStatusUI, renderEquipment, log, renderLog, message, updateWordUI, attachGridKeyboard } from './ui.js';
@@ -23,7 +25,7 @@ import { computeAttackInfo } from './compute.js';
 import { openShop, closeShop, selectHeal, equipItem } from './shop.js';
 import { closeEnding } from './endings.js';
 import { updateStats } from './stats.js';
-import { resetGame, startNewRun, gameWon, gameLost } from './game.js';
+import { resetGame, startNewRun, gameWon, gameLost, startNewRunHard, startNewRunExtreme } from './game.js';
 
 function isValidWord(w) {
   if (!w || w.length < 2) return false;
@@ -102,6 +104,14 @@ shuffleBtn.addEventListener('click', () => {
 
 newGameBtn.addEventListener('click', () => {
   startNewRun();
+});
+
+// Difficulty mode events
+hardModeBtn.addEventListener('click', () => {
+  startNewRunHard();
+});
+extremeModeBtn.addEventListener('click', () => {
+  startNewRunExtreme();
 });
 
 // Shop events

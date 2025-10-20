@@ -45,6 +45,9 @@ export const state = {
   nextEnemyAttackHalved: false,
   enemySpecial: { every: null, countdown: null },
 
+  // Difficulty (HP scaling for enemies)
+  difficultyMultiplier: 1,
+
   // Dictionary: null until loaded successfully
   dictionarySet: null,
 };
@@ -53,14 +56,24 @@ export function setDictionarySet(set) {
   if (set && set.size) state.dictionarySet = set;
 }
 
+function applyEnemyDifficultyScaling() {
+  const mult = state.difficultyMultiplier || 1;
+  if (!state.enemy) return;
+  const scaledMax = Math.ceil(state.enemy.maxHearts * mult);
+  state.enemy.maxHearts = scaledMax;
+  state.enemy.hp = scaledMax * HALF; // set to full HP under new max
+}
+
 export function advanceEnemy() {
   state.currentEnemyIndex = (state.currentEnemyIndex + 1) % ENEMIES.length;
   state.enemy = createEnemy(ENEMIES[state.currentEnemyIndex]);
+  applyEnemyDifficultyScaling();
 }
 
 export function resetEnemyToFirst() {
   state.currentEnemyIndex = 0;
   state.enemy = createEnemy(ENEMIES[0]);
+  applyEnemyDifficultyScaling();
 }
 
 export function clampPlayerHP() {

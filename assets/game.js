@@ -100,3 +100,16 @@ export function startNewRun() {
   renderLog();
   log(`New run started. Enemy: ${state.enemy.name}.`);
 }
+
+// Difficulty modes
+export function startNewRunHard() {
+  state.difficultyMultiplier = 1.5;
+  startNewRun();
+  log('Hard mode: enemies have 1.5× HP.');
+}
+
+export function startNewRunExtreme() {
+  state.difficultyMultiplier = 2.5;
+  startNewRun();
+  log('Extreme mode: enemies have 2.5× HP.');
+}
