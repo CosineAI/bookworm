@@ -28,6 +28,8 @@ header h1 {
   color: #f3e8a1;
   font-weight: 400;
   letter-spacing: 0.04em;
+  font-size: 9rem;
+  line-height: 0.9;
 }
 
 main {
@@ -423,29 +425,42 @@ footer {
   .hearts { font-size: 1.15rem; }
 }
 
+/* Layout wrapper to center the whole composition */
+.content-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* Side video (hidden by default, shown on xl screens) */
 .side-video {
   display: none;
 }
 
 @media (min-width: 1280px) {
+  .content-wrap {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
   .side-video {
     display: block;
-    position: fixed;
-    left: 24px;
-    top: 120px; /* roughly below header */
+    position: static;
     width: 360px;
     height: auto;
+    margin-top: 24px;
     border-radius: 14px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.12);
     outline: 1px solid rgba(0,0,0,0.06);
     background: #000; /* avoid white flash before load */
   }
 
-  /* Nudge main to the right so it doesn't overlap the fixed video */
+  /* Keep main centered */
   main {
-    margin-left: calc(24px + 360px + 24px);
-    margin-right: 24px;
+    margin: 2.2rem auto 0 auto;
     max-width: 1000px;
   }
 }

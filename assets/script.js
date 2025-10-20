@@ -488,8 +488,8 @@ function heartsString(currentHalves, maxHearts) {
   let s = '';
   const full = Math.floor(currentHalves / 2);
   const half = currentHalves % 2;
-  for (let i=0; i&lt;maxHearts; i++) {
-    if (i &lt; full) s += '❤️';
+  for (let i=0; i<maxHearts; i++) {
+    if (i < full) s += '❤️';
     else if (i === full && half) s += '💔';
     else s += '🤍';
   }
@@ -501,10 +501,10 @@ function renderHeartsTo(el, currentHalves, maxHearts) {
   el.innerHTML = '';
   const full = Math.floor(currentHalves / 2);
   const half = currentHalves % 2;
-  for (let i = 0; i &lt; maxHearts; i++) {
+  for (let i = 0; i < maxHearts; i++) {
     const span = document.createElement('span');
     span.className = 'heart';
-    if (i &lt; full) span.classList.add('full');
+    if (i < full) span.classList.add('full');
     else if (i === full && half) span.classList.add('half');
     else span.classList.add('empty');
     el.appendChild(span);
