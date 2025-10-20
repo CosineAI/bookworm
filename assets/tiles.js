@@ -21,6 +21,7 @@ export function randomType() {
   const pFire = (TILE_TYPE_PROBABILITIES.fire || 0) * (spawnBias.fire || 1);
   const pPoison = (TILE_TYPE_PROBABILITIES.poison || 0) * (spawnBias.poison || 1);
   const pCursed = (TILE_TYPE_PROBABILITIES.cursed || 0) * (spawnBias.cursed || 1);
+  const pFrozen = (TILE_TYPE_PROBABILITIES.frozen || 0) * (spawnBias.frozen || 1);
 
   if (r < pRed) return TILE_TYPES.RED;
   if (r < pRed + pGreen) return TILE_TYPES.GREEN;
@@ -28,6 +29,7 @@ export function randomType() {
   if (r < pRed + pGreen + pGray + pFire) return TILE_TYPES.FIRE;
   if (r < pRed + pGreen + pGray + pFire + pPoison) return TILE_TYPES.POISON;
   if (r < pRed + pGreen + pGray + pFire + pPoison + pCursed) return TILE_TYPES.CURSED;
+  if (r < pRed + pGreen + pGray + pFire + pPoison + pCursed + pFrozen) return TILE_TYPES.FROZEN;
   return TILE_TYPES.NORMAL;
 }
 
@@ -42,6 +44,7 @@ export function badgeFor(type) {
   if (type === TILE_TYPES.FIRE) return '🔥';
   if (type === TILE_TYPES.POISON) return '☠️';
   if (type === TILE_TYPES.CURSED) return '⚠️';
+  if (type === TILE_TYPES.FROZEN) return '❄️';
   return '';
 }
 
@@ -59,6 +62,8 @@ export function effectDescription(type) {
       return 'Poison: Halves the enemy’s next attack when used.';
     case TILE_TYPES.CURSED:
       return 'Cursed: Odd count halves total attack; even count increases attack by 1.5×.';
+    case TILE_TYPES.FROZEN:
+      return 'Frozen: Halves your total attack this turn but the enemy skips their turn (including specials).';
     default:
       return 'Normal tile.';
   }
