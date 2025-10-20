@@ -8,7 +8,7 @@ body {
   height: 100vh;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
   margin: 0;
-  background: linear-gradient(120deg, #f8fafc 70%, #e7eaf2 100%);
+  background: linear-gradient(135deg, #0f2d1e 0%, #1f3d2b 55%, #3b2a1f 100%);
   color: #222;
   display: flex;
   flex-direction: column;
@@ -16,12 +16,18 @@ body {
 }
 
 header {
-  background: #23272f;
-  color: #fff;
+  background: #1b3a2e;
+  color: #f3e8a1;
   padding: 1.2rem 0 1.2rem;
   text-align: center;
   letter-spacing: 0.02em;
-  box-shadow: 0 2px 10px rgba(40,40,40,0.04);
+  box-shadow: 0 2px 10px rgba(40,40,40,0.12);
+}
+header h1 {
+  font-family: "Jacquard 24", serif;
+  color: #f3e8a1;
+  font-weight: 400;
+  letter-spacing: 0.04em;
 }
 
 main {
@@ -29,10 +35,11 @@ main {
   max-width: 860px;
   width: 100%;
   margin: 2.2rem auto 0 auto;
-  background: #fff;
+  background: #faf3dd; /* parchment */
   padding: 2.0rem 2.0rem 2.0rem;
   border-radius: 18px;
-  box-shadow: 0 6px 32px 0 rgba(42,54,96,0.07), 0 1.5px 6px 0 rgba(0,0,0,0.03);
+  border: 1px solid #e6d3a3;
+  box-shadow: 0 6px 32px 0 rgba(58, 42, 31, 0.12), 0 1.5px 6px 0 rgba(0,0,0,0.04);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -42,14 +49,14 @@ main {
 }
 
 footer {
-  background: #23272f;
-  color: #fff;
+  background: #1b3a2e;
+  color: #f3e8a1;
   text-align: center;
   padding: 1.0rem 0;
   margin-top: 2.4rem;
   border-radius: 0 0 18px 18px;
   font-size: 0.95rem;
-  box-shadow: 0 -2px 12px 0 rgba(40,40,40,0.06);
+  box-shadow: 0 -2px 12px 0 rgba(40,40,40,0.12);
   flex-shrink: 0;
 }
 
@@ -79,10 +86,10 @@ footer {
 }
 .hud-label {
   font-weight: 600;
-  color: #111827;
+  color: #3a2e1a;
   padding: .2rem .5rem;
   border-radius: 8px;
-  background: #eef2ff;
+  background: #f6e5b8; /* pale gold */
 }
 .hearts {
   font-size: 1.25rem;
@@ -130,8 +137,8 @@ footer {
   margin: .2rem 0 .8rem 0;
   padding: .4rem .6rem;
   border-radius: 12px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: #faf3dd; /* parchment */
+  border: 1px solid #e6d3a3;
 }
 .statusbar .message {
   flex: 1;
@@ -146,14 +153,14 @@ footer {
   align-items: center;
 }
 .equip-list .pill {
-  background: #eef2ff;
-  color: #111827;
+  background: #f6e5b8; /* pale gold */
+  color: #3a2e1a
 }
 
 .pill {
   padding: .35rem .65rem;
   border-radius: 999px;
-  background: #f3f4f6;
+  background: #ede7d3; /* parchment tint */
   font-size: .85rem;
 }
 .enemy-status {
@@ -191,7 +198,7 @@ footer {
 .tile {
   display: grid;
   place-items: center;
-  background: #f8fafc;
+  background: #f6f0e0; /* parchment tile */
   border-radius: 14px;
   box-shadow: inset 0 -2px 0 rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.04);
   font-size: clamp(1.6rem, 5.5vw, 2.2rem);
@@ -207,10 +214,10 @@ footer {
   box-shadow: inset 0 -2px 0 rgba(0,0,0,0.06), 0 8px 18px rgba(0,0,0,0.06);
 }
 .tile.selected {
-  background: #e0e7ff;
+  background: #dfe9d8; /* soft green */
   color: #111827;
-  box-shadow: inset 0 -2px 0 rgba(59,130,246,0.25), 0 6px 16px rgba(59,130,246,0.18);
-  outline: 2px solid rgba(59,130,246,0.45);
+  box-shadow: inset 0 -2px 0 rgba(34,197,94,0.25), 0 6px 16px rgba(34,197,94,0.18);
+  outline: 2px solid rgba(34,197,94,0.45);
 }
 .tile .badge {
   position: absolute;
@@ -310,11 +317,11 @@ footer {
   cursor: not-allowed;
 }
 .btn.primary {
-  background: #3b82f6;
+  background: #2f6f3e; /* forest green */
   color: white;
 }
 .btn.success {
-  background: #10b981;
+  background: #b8860b; /* gold */
   color: white;
 }
 
