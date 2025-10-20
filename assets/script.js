@@ -807,12 +807,8 @@ function resetGame() {
   // Clear transient status
   nextEnemyAttackHalved = false;
 
-  // Advance to the next enemy for increasing difficulty
-  const wasLast = currentEnemyIndex === ENEMIES.length - 1;
+  // Advance to the next enemy for increasing difficulty (within the same run)
   currentEnemyIndex = (currentEnemyIndex + 1) % ENEMIES.length;
-  if (wasLast && currentEnemyIndex === 0) {
-    clearRunStats(); // new run started
-  }
   enemy = createEnemy(ENEMIES[currentEnemyIndex]);
 
   initEnemySpecial();
@@ -829,7 +825,6 @@ function resetGame() {
   submitBtn.disabled = false;
   shuffleBtn.disabled = false;
   newGameBtn.style.display = 'none';
-  logEl.innerHTML = '';
   log(`New game started. Enemy: ${enemy.name}.`);
 }
 
