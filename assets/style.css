@@ -488,7 +488,8 @@ footer {
     display: block;
     width: 360px;
     height: auto;
-    aspect-ratio: 16 / 9; /* reserve height before video metadata loads to prevent shift */
+    aspect-ratio: 1 / 1; /* square container */
+    border-radius: 14px to prevent shift */
     border-radius: 14px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.12);
     outline: 1px solid rgba(0,0,0,0.06);
