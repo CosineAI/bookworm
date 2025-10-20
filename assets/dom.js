@@ -12,6 +12,7 @@ export const submitBtn = document.getElementById('submitBtn');
 export const clearBtn = document.getElementById('clearBtn');
 export const shuffleBtn = document.getElementById('shuffleBtn');
 export const newGameBtn = document.getElementById('newGameBtn');
+export const newRunBtn = document.getElementById('newRunBtn');
 export const hardModeBtn = document.getElementById('hardModeBtn');
 export const extremeModeBtn = document.getElementById('extremeModeBtn');
 export const logEl = document.getElementById('log');

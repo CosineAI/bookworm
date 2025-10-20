@@ -67,6 +67,7 @@
     </section>
 
     <section class="wordbar">
+      <button id="newRunBtn" class="btn success">New Game</button>
       <div class="word">
         <span class="muted">Word:</span> <strong id="currentWord">(none)</strong>
         <span class="muted sep">|</span>
@@ -79,8 +80,6 @@
         <button id="clearBtn" class="btn">Clear</button>
         <button id="shuffleBtn" class="btn">Shuffle</button>
         <button id="newGameBtn" class="btn success" style="display:none;">New Game</button>
-        <button id="hardModeBtn" class="btn warning">Hard Mode</button>
-        <button id="extremeModeBtn" class="btn danger">Extreme Mode</button>
       </div>
     </section>
 
@@ -89,6 +88,10 @@
         <button id="logToggleBtn" class="btn">Show full log</button>
       </div>
       <div id="logList"></div>
+      <div class="log-header" style="margin-top:.6rem;">
+        <button id="hardModeBtn" class="btn warning">Hard Mode</button>
+        <button id="extremeModeBtn" class="btn danger">Extreme Mode</button>
+      </div>
     </section>
 
     <!-- Shop overlay -->

@@ -7,6 +7,7 @@ import {
   clearBtn,
   shuffleBtn,
   newGameBtn,
+  newRunBtn,
   logToggleBtn,
   healBtn,
   equipItem1Btn,
@@ -148,6 +149,11 @@ attachGridKeyboard();
 window.addEventListener('grid:tile-click', (e) => {
   const { r, c } = e.detail || {};
   if (typeof r === 'number' && typeof c === 'number') onTileClick(r, c);
+});
+
+// New Run button
+newRunBtn.addEventListener('click', () => {
+  startNewRun();
 });
 
 // Kick off
