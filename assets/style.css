@@ -376,6 +376,7 @@ footer {
   justify-content: flex-end;
   align-items: center;
   margin-bottom: .4rem;
+  gap: .6rem; /* spacing between action buttons */
 }
 
 .damage-float {
