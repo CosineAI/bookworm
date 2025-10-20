@@ -221,11 +221,14 @@ footer {
   background: #dfe9d8; /* soft green */
   color: #111827;
   box-shadow: inset 0 -2px 0 rgba(34,197,94,0.25), 0 6px 16px rgba(34,197,94,0.18);
-  outline: 2px solid rgba(34,197,94,0.45);
+  /* Thicker, darker selection ring for visibility */
+  outline: 5px solid #1f2937;
 }
 /* Visible focus for keyboard navigation */
 .tile:focus {
-  outline: 3px solid rgba(34,197,94,0.6);
+  /* Thicker, dark focus ring */
+  outline: 5px solid #1f2937;
+  outline-offset: 2px;
   box-shadow: inset 0 -2px 0 rgba(34,197,94,0.25), 0 6px 16px rgba(34,197,94,0.18);
 }
 .tile .badge {
