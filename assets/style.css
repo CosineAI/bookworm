@@ -289,6 +289,12 @@ footer {
   font-size: .95rem;
   color: #374151;
 }
+.log-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: .4rem;
+}
 
 .damage-float {
   position: absolute;

@@ -26,6 +26,8 @@ const mainEl = document.querySelector('main');
 const enemyStatusEl = document.getElementById('enemyStatus');
 const enemyNameEl = document.getElementById('enemyName');
 const equipmentListEl = document.getElementById('equipmentList');
+const logToggleBtn = document.getElementById('logToggleBtn');
+const logListEl = document.getElementById('logList');
 
 // Shop DOM
 const shopOverlay = document.getElementById('shopOverlay');
@@ -55,6 +57,10 @@ let selected = [];         // array of {r, c}
 let selectedSet = new Set();
 let gameOver = false;
 let refillAnimSet = new Set(); // positions to animate falling when refilled
+
+// Log state: toggle between last 5 lines and full log
+const logLines = [];
+let logCollapsed = true;
 
 // Run statistics across battles (reset when starting a new run)
 const runStats = {
@@ -496,10 +502,20 @@ function floatDamage(targetEl, txt, kind='enemy') {
   setTimeout(() => span.remove(), 1000);
 }
 
+function renderLog() {
+  if (!logListEl) return;
+  logListEl.innerHTML = '';
+  const arr = logCollapsed ? logLines.slice(-5) : logLines;
+  // render newest at top
+  for (let i = arr.length - 1; i >= 0; i--) {
+    const p = document.createElement('div');
+    p.textContent = arr[i];
+    logListEl.appendChild(p);
+  }
+}
 function log(line) {
-  const p = document.createElement('div');
-  p.textContent = line;
-  logEl.prepend(p);
+  logLines.push(line);
+  renderLog();
 }
 
 function updateEnemyNameUI() {
@@ -796,32 +812,25 @@ function isValidWord(w) {
   if (!w || w.length < 2) return false;
   // Always check against the currently active dictionary (remote, local, or built-in)
   return dictionarySet ? dictionarySet.has(w) : false;
-}>
+}
+
 // Dictionary loading (non-blocking: play allowed via fallback while it loads)
 // UI status is not shown; we log to the browser console only.
 async function initDictionary() {
-  submitBtn.disabled = false; // enable');
   submitBtn.disabled = false; // enable with built-in fallback immediately
+  console.log('[Dictionary] Loading… fallback active until remote dictionary is ready.');
 
   try {
     const res = await loadEnglishDictionary();
     dictionarySet = res.set;
-    dictStatusEl.textContent = res.info;
     if (res.isFallback) {
-      dictStatusEl.style.background = '#fee2e2';
-      dictStatusEl.style.color = '#7f1d1d';
-      log(res.info);
+      console.warn(`[Dictionary] Fallback loaded: ${res.info}`);
     } else {
-      dictStatusEl.style.background = '#dcfce7';
-      dictStatusEl.style.color = '#14532d';
-      log(res.info);
+      console.log(`[Dictionary] Loaded: ${res.info}`);
     }
-  } catch {
+  } catch (e) {
     // Keep using built-in set
-    dictStatusEl.textContent = 'Offline mode: small built-in dictionary';
-    dictStatusEl.style.background = '#fee2e2';
-    dictStatusEl.style.color = '#7f1d1d';
-    log('Dictionary fetch failed. Using built-in fallback list.');
+    console.warn('[Dictionary] Fetch failed. Using built-in fallback list.', e && e.message ? e.message : '');
   }
 }
 
@@ -876,7 +885,9 @@ function startNewRun() {
   submitBtn.disabled = false;
   shuffleBtn.disabled = false;
   newGameBtn.style.display = 'none';
-  logEl.innerHTML = '';
+  // Clear log lines for a fresh run and re-render
+  logLines.length = 0;
+  renderLog();
   log(`New run started. Enemy: ${enemy.name}.`);
 }
 
@@ -1018,6 +1029,17 @@ endingRestartBtn.addEventListener('click', () => {
   closeEnding();
   startNewRun();
 });
+
+// Log toggle
+if (logToggleBtn) {
+  logToggleBtn.addEventListener('click', () => {
+    logCollapsed = !logCollapsed;
+    logToggleBtn.textContent = logCollapsed ? 'Show full log' : 'Show last 5';
+    renderLog();
+  });
+  // initialize toggle button label
+  logToggleBtn.textContent = 'Show full log';
+}
 
 // Kick off
 initGrid();
