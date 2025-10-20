@@ -468,3 +468,11 @@ footer {
     background: #000; /* avoid white flash before load */
   }
 }
+
+/* Ensure selected/focused ring overrides type-specific outlines */
+.tile.selected,
+.tile:focus,
+.tile.selected:focus {
+  outline: 5px solid #1f2937 !important;
+  outline-offset: 2px;
+}
