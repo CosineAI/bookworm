@@ -39,6 +39,11 @@ export function renderGrid() {
     }
   }
   state.refillAnimSet.clear();
+  try {
+    if (!state.keyboardFocus) state.keyboardFocus = { r: 0, c: 0 };
+    const btn = gridEl.querySelector(`[data-pos="${state.keyboardFocus.r},${state.keyboardFocus.c}"]`) || gridEl.querySelector('.tile');
+    if (btn) btn.focus();
+  } catch {}
 }
 
 export function onTileClick(r, c) {

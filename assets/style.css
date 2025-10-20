@@ -223,6 +223,11 @@ footer {
   box-shadow: inset 0 -2px 0 rgba(34,197,94,0.25), 0 6px 16px rgba(34,197,94,0.18);
   outline: 2px solid rgba(34,197,94,0.45);
 }
+/* Visible focus for keyboard navigation */
+.tile:focus {
+  outline: 3px solid rgba(34,197,94,0.6);
+  box-shadow: inset 0 -2px 0 rgba(34,197,94,0.25), 0 6px 16px rgba(34,197,94,0.18);
+}
 .tile .badge {
   position: absolute;
   bottom: 6px;
@@ -323,6 +328,11 @@ footer {
 .btn[disabled] {
   opacity: .6;
   cursor: not-allowed;
+}
+/* Ensure buttons show a clear focus ring */
+.btn:focus {
+  outline: 3px solid rgba(37,99,235,0.6);
+  outline-offset: 2px;
 }
 .btn.primary {
   background: #2f6f3e; /* forest green */

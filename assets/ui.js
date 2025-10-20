@@ -15,8 +15,10 @@ import {
   enemyStatusEl,
   equipmentListEl,
   mainEl,
+  shopOverlay,
 } from './dom.js';
 import { computeAttackInfo } from './compute.js';
+import { GRID_SIZE } from './constants.js';
 
 export function renderHeartsTo(el, currentHalves, maxHearts) {
   if (!el) return;
@@ -148,14 +150,62 @@ export function updateWordUI() {
 
 // Accessibility keyboard helpers
 export function attachGridKeyboard() {
+  function focusTile(r, c) {
+    const btn = gridEl.querySelector(`[data-pos="${r},${c}"]`);
+    if (btn) {
+      btn.focus();
+      state.keyboardFocus = { r, c };
+    }
+  }
+
   gridEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const pos = e.target.getAttribute('data-pos');
-      if (pos) {
-        const [r, c] = pos.split(',').map(Number);
-        const ev = new CustomEvent('grid:tile-click', { detail: { r, c } });
-        window.dispatchEvent(ev);
+    if (state.gameOver) return;
+    if (shopOverlay && shopOverlay.classList.contains('show')) return;
+
+    const posAttr = e.target && e.target.getAttribute ? e.target.getAttribute('data-pos') : null;
+    let r = state.keyboardFocus?.r ?? 0;
+    let c = state.keyboardFocus?.c ?? 0;
+    if (posAttr) {
+      const parts = posAttr.split(',').map(Number);
+      if (parts.length === 2) {
+        r = parts[0];
+        c = parts[1];
       }
+    }
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        c = (c - 1 + GRID_SIZE) % GRID_SIZE;
+        focusTile(r, c);
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        c = (c + 1) % GRID_SIZE;
+        focusTile(r, c);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        r = (r - 1 + GRID_SIZE) % GRID_SIZE;
+        focusTile(r, c);
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        r = (r + 1) % GRID_SIZE;
+        focusTile(r, c);
+        break;
+      case ' ':
+      case 'Spacebar':
+      case 'Space':
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('grid:tile-click', { detail: { r, c } }));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (submitBtn && !submitBtn.disabled) submitBtn.click();
+        break;
+      default:
+        break;
     }
   });
 }

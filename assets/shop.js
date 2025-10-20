@@ -11,11 +11,15 @@ import {
   item2DescEl,
   equipItem1Btn,
   equipItem2Btn,
+  continueBtn,
 } from './dom.js';
 import { renderHearts, renderEquipment, log } from './ui.js';
 import { createItemPool } from './items.js';
 
 let shopItems = [];
+let shopButtons = [];
+let shopFocusIndex = 0;
+let shopKeyHandler = null;
 
 function pickRandomItems(pool, n = 2) {
   const copy = [...pool];
@@ -50,6 +54,49 @@ function renderShopItems() {
   }
 }
 
+function focusShopButton(i) {
+  if (!shopButtons || shopButtons.length === 0) return;
+  shopFocusIndex = Math.max(0, Math.min(i, shopButtons.length - 1));
+  const btn = shopButtons[shopFocusIndex];
+  try { btn && btn.focus(); } catch {}
+}
+
+function attachShopKeyboard() {
+  shopKeyHandler = (e) => {
+    if (!shopOverlay || !shopOverlay.classList.contains('show')) return;
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        focusShopButton(shopFocusIndex + 1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        focusShopButton(shopFocusIndex - 1);
+        break;
+      case ' ':
+      case 'Spacebar':
+      case 'Space':
+      case 'Enter':
+        e.preventDefault();
+        {
+          const btn = shopButtons[shopFocusIndex];
+          if (btn && !btn.disabled) btn.click();
+        }
+        break;
+      default:
+        break;
+    }
+  };
+  window.addEventListener('keydown', shopKeyHandler);
+}
+
+function detachShopKeyboard() {
+  if (shopKeyHandler) {
+    window.removeEventListener('keydown', shopKeyHandler);
+    shopKeyHandler = null;
+  }
+}
+
 export function openShop() {
   state.shopSelectionMade = false;
 
@@ -64,11 +111,19 @@ export function openShop() {
 
   shopOverlay.classList.add('show');
   shopOverlay.setAttribute('aria-hidden', 'false');
+
+  shopButtons = [healBtn, equipItem1Btn, equipItem2Btn, continueBtn].filter(Boolean);
+
+  let initialIndex = shopButtons.findIndex(b => !b.disabled);
+  if (initialIndex < 0) initialIndex = 0;
+  focusShopButton(initialIndex);
+  attachShopKeyboard();
 }
 
 export function closeShop() {
   shopOverlay.classList.remove('show');
   shopOverlay.setAttribute('aria-hidden', 'true');
+  detachShopKeyboard();
 }
 
 export function selectHeal() {

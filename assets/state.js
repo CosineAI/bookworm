@@ -12,6 +12,7 @@ export const state = {
   selectedSet: new Set(),
   gameOver: false,
   refillAnimSet: new Set(),
+  keyboardFocus: { r: 0, c: 0 },
 
   // Log
   logLines: [],
