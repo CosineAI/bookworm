@@ -190,6 +190,14 @@ function renderEquipment() {
     const pill = document.createElement('span');
     pill.className = 'pill';
     pill.textContent = it.name;
+    // Native tooltip on hover
+    if (it.desc) {
+      pill.title = it.desc;
+      pill.setAttribute('aria-label', `${it.name}: ${it.desc}`);
+    } else {
+      pill.title = it.name;
+      pill.setAttribute('aria-label', it.name);
+    }
     equipmentListEl.appendChild(pill);
   }
 }
@@ -947,7 +955,7 @@ function equipItem(index) {
       item.apply();
       // Track equipment list (avoid duplicates by key)
       if (!equippedItems.find(it => it.key === item.key)) {
-        equippedItems.push({ key: item.key, name: item.name });
+        equippedItems.push({ key: item.key, name: item.name, desc: item.desc });
       }
       renderEquipment();
       log(`Shop: Equipped ${item.name}.`);
