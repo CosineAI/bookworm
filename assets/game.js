@@ -109,7 +109,7 @@ export function startNewRunHard() {
 }
 
 export function startNewRunExtreme() {
-  state.difficultyMultiplier = 2.5;
+  state.difficultyMultiplier = 2.0;
   startNewRun();
-  log('Extreme mode: enemies have 2.5× HP.');
+  log('Extreme mode: enemies have 2× HP.');
 }
