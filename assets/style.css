@@ -65,7 +65,7 @@ footer {
 .hud {
   display: grid;
   grid-template-columns: 1fr 1fr; /* left and right only */
-  align-items: center;
+  align-items: start;
   gap: 1rem;
   margin-bottom: .6rem;
 }
