@@ -9,6 +9,9 @@ export function setSpawnBias(bias) {
 export function resetSpawnBias() {
   spawnBias = {};
 }
+export function getSpawnBias() {
+  return { ...spawnBias };
+}
 
 export function randomType() {
   const r = Math.random();

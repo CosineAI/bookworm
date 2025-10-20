@@ -1,6 +1,6 @@
 // Word Battle — Bookworm-like (Refactored to modules, ready for future mechanics)
 import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES, LONG_WORD_SCALING } from './constants.js';
-import { makeTile, badgeFor, effectDescription, setSpawnBias, resetSpawnBias } from './tiles.js';
+import { makeTile, badgeFor, effectDescription, setSpawnBias, resetSpawnBias, getSpawnBias } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
 import { Combatant } from './combatants.js';
 import { letterDamageHalves } from './letters.js';
@@ -26,6 +26,8 @@ const mainEl = document.querySelector('main');
 const enemyStatusEl = document.getElementById('enemyStatus');
 const enemyNameEl = document.getElementById('enemyName');
 const equipmentListEl = document.getElementById('equipmentList');
+const logToggleBtn = document.getElementById('logToggleBtn');
+const logListEl = document.getElementById('logList');
 
 // Shop DOM
 const shopOverlay = document.getElementById('shopOverlay');
@@ -55,6 +57,10 @@ let selected = [];         // array of {r, c}
 let selectedSet = new Set();
 let gameOver = false;
 let refillAnimSet = new Set(); // positions to animate falling when refilled
+
+// Log state: toggle between last 5 lines and full log
+const logLines = [];
+let logCollapsed = true;
 
 // Run statistics across battles (reset when starting a new run)
 const runStats = {
@@ -176,6 +182,31 @@ const activeEffects = {
   fireWarAxe: false,
 };
 let shopSelectionMade = false;
+
+// Equipped items tracking and HUD rendering
+let equippedItems = [];
+function renderEquipment() {
+  if (!equipmentListEl) return;
+  equipmentListEl.innerHTML = '';
+  if (!equippedItems || equippedItems.length === 0) {
+    equipmentListEl.textContent = '—';
+    return;
+  }
+  for (const it of equippedItems) {
+    const pill = document.createElement('span');
+    pill.className = 'pill';
+    pill.textContent = it.name;
+    // Native tooltip on hover
+    if (it.desc) {
+      pill.title = it.desc;
+      pill.setAttribute('aria-label', `${it.name}: ${it.desc}`);
+    } else {
+      pill.title = it.name;
+      pill.setAttribute('aria-label', it.name);
+    }
+    equipmentListEl.appendChild(pill);
+  }
+}
 
 // Status effects
 let nextEnemyAttackHalved = false;
@@ -471,10 +502,20 @@ function floatDamage(targetEl, txt, kind='enemy') {
   setTimeout(() => span.remove(), 1000);
 }
 
+function renderLog() {
+  if (!logListEl) return;
+  logListEl.innerHTML = '';
+  const arr = logCollapsed ? logLines.slice(-5) : logLines;
+  // render newest at top
+  for (let i = arr.length - 1; i >= 0; i--) {
+    const p = document.createElement('div');
+    p.textContent = arr[i];
+    logListEl.appendChild(p);
+  }
+}
 function log(line) {
-  const p = document.createElement('div');
-  p.textContent = line;
-  logEl.prepend(p);
+  logLines.push(line);
+  renderLog();
 }
 
 function updateEnemyNameUI() {
@@ -774,30 +815,22 @@ function isValidWord(w) {
 }
 
 // Dictionary loading (non-blocking: play allowed via fallback while it loads)
+// UI status is not shown; we log to the browser console only.
 async function initDictionary() {
-  dictStatusEl.textContent = 'Loading dictionary… fallback active';
-  dictStatusEl.classList.add('pill');
   submitBtn.disabled = false; // enable with built-in fallback immediately
+  console.log('[Dictionary] Loading… fallback active until remote dictionary is ready.');
 
   try {
     const res = await loadEnglishDictionary();
     dictionarySet = res.set;
-    dictStatusEl.textContent = res.info;
     if (res.isFallback) {
-      dictStatusEl.style.background = '#fee2e2';
-      dictStatusEl.style.color = '#7f1d1d';
-      log(res.info);
+      console.warn(`[Dictionary] Fallback loaded: ${res.info}`);
     } else {
-      dictStatusEl.style.background = '#dcfce7';
-      dictStatusEl.style.color = '#14532d';
-      log(res.info);
+      console.log(`[Dictionary] Loaded: ${res.info}`);
     }
-  } catch {
+  } catch (e) {
     // Keep using built-in set
-    dictStatusEl.textContent = 'Offline mode: small built-in dictionary';
-    dictStatusEl.style.background = '#fee2e2';
-    dictStatusEl.style.color = '#7f1d1d';
-    log('Dictionary fetch failed. Using built-in fallback list.');
+    console.warn('[Dictionary] Fetch failed. Using built-in fallback list.', e && e.message ? e.message : '');
   }
 }
 
@@ -807,12 +840,8 @@ function resetGame() {
   // Clear transient status
   nextEnemyAttackHalved = false;
 
-  // Advance to the next enemy for increasing difficulty
-  const wasLast = currentEnemyIndex === ENEMIES.length - 1;
+  // Advance to the next enemy for increasing difficulty (within the same run)
   currentEnemyIndex = (currentEnemyIndex + 1) % ENEMIES.length;
-  if (wasLast && currentEnemyIndex === 0) {
-    clearRunStats(); // new run started
-  }
   enemy = createEnemy(ENEMIES[currentEnemyIndex]);
 
   initEnemySpecial();
@@ -829,7 +858,6 @@ function resetGame() {
   submitBtn.disabled = false;
   shuffleBtn.disabled = false;
   newGameBtn.style.display = 'none';
-  logEl.innerHTML = '';
   log(`New game started. Enemy: ${enemy.name}.`);
 }
 
@@ -857,7 +885,9 @@ function startNewRun() {
   submitBtn.disabled = false;
   shuffleBtn.disabled = false;
   newGameBtn.style.display = 'none';
-  logEl.innerHTML = '';
+  // Clear log lines for a fresh run and re-render
+  logLines.length = 0;
+  renderLog();
   log(`New run started. Enemy: ${enemy.name}.`);
 }
 
@@ -878,21 +908,43 @@ function pickRandomItems(pool, n = 2) {
 
 function renderShopItems() {
   const [a, b] = shopItems;
-  item1NameEl.textContent = a.name;
-  item1DescEl.textContent = a.desc;
-  item2NameEl.textContent = b.name;
-  item2DescEl.textContent = b.desc;
+
+  // Item 1
+  if (a) {
+    item1NameEl.textContent = a.name;
+    item1DescEl.textContent = a.desc;
+    equipItem1Btn.disabled = false;
+  } else {
+    item1NameEl.textContent = 'Sold out';
+    item1DescEl.textContent = 'No items available.';
+    equipItem1Btn.disabled = true;
+  }
+
+  // Item 2
+  if (b) {
+    item2NameEl.textContent = b.name;
+    item2DescEl.textContent = b.desc;
+    equipItem2Btn.disabled = false;
+  } else {
+    item2NameEl.textContent = 'Sold out';
+    item2DescEl.textContent = 'No items available.';
+    equipItem2Btn.disabled = true;
+  }
 }
 
 function openShop() {
   shopSelectionMade = false;
-  const pool = createItemPool({ activeEffects, setSpawnBias, player, renderHearts });
-  shopItems = pickRandomItems(pool, 2);
+
+  // Build item pool and remove already equipped items (one quantity per run)
+  const poolAll = createItemPool({ activeEffects, setSpawnBias, player, renderHearts });
+  const owned = new Set((equippedItems || []).map(it => it.key));
+  const pool = poolAll.filter(item => !owned.has(item.key));
+
+  // Pick up to 2 from the filtered pool; fall back to unfiltered if empty to avoid UI breakage
+  shopItems = pickRandomItems(pool.length > 0 ? pool : poolAll, 2);
   renderShopItems();
 
   healBtn.disabled = false;
-  equipItem1Btn.disabled = false;
-  equipItem2Btn.disabled = false;
 
   shopOverlay.classList.add('show');
   shopOverlay.setAttribute('aria-hidden', 'false');
@@ -926,23 +978,35 @@ function selectHeal() {
 
 function equipItem(index) {
   if (shopSelectionMade) return;
-  const item = shopItems[index];
-  if (!item) return;
-  item.apply();
-  // Track equipment list (avoid duplicates by key)
-  if (!equippedItems.find(it => it.key === item.key)) {
-    equippedItems.push({ key: item.key, name: item.name });
-  }
-  renderEquipment();
-  log(`Shop: Equipped ${item.name}.`);
   shopSelectionMade = true;
-  healBtn.disabled = true;
-  equipItem1Btn.disabled = true;
-  equipItem2Btn.disabled = true;
 
-  // Proceed immediately to next battle
-  closeShop();
-  resetGame();
+  let item = shopItems && shopItems[index];
+
+  try {
+    if (item && typeof item.apply === 'function') {
+      item.apply();
+      // Track equipment list (avoid duplicates by key)
+      if (!equippedItems.find(it => it.key === item.key)) {
+        equippedItems.push({ key: item.key, name: item.name, desc: item.desc });
+      }
+      renderEquipment();
+      log(`Shop: Equipped ${item.name}.`);
+    } else {
+      log('Shop: No item available to equip. Proceeding to next battle.');
+    }
+  } catch (e) {
+    console.error('Equip error:', e);
+    log(`Shop: Failed to equip item due to an error (${e && e.message ? e.message : 'unknown'}). Proceeding to next battle.`);
+  } finally {
+    // Disable all shop actions to prevent double-activation
+    try { if (healBtn) healBtn.disabled = true; } catch {}
+    try { if (equipItem1Btn) equipItem1Btn.disabled = true; } catch {}
+    try { if (equipItem2Btn) equipItem2Btn.disabled = true; } catch {}
+
+    // Proceed immediately to next battle
+    try { closeShop(); } catch {}
+    try { resetGame(); } catch {}
+  }
 }
 
 // Events
@@ -965,6 +1029,17 @@ endingRestartBtn.addEventListener('click', () => {
   closeEnding();
   startNewRun();
 });
+
+// Log toggle
+if (logToggleBtn) {
+  logToggleBtn.addEventListener('click', () => {
+    logCollapsed = !logCollapsed;
+    logToggleBtn.textContent = logCollapsed ? 'Show full log' : 'Show last 5';
+    renderLog();
+  });
+  // initialize toggle button label
+  logToggleBtn.textContent = 'Show full log';
+}
 
 // Kick off
 initGrid();

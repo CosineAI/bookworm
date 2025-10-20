@@ -29,11 +29,6 @@
         </div>
       </div>
 
-      <div class="hud-center">
-        <div id="dictStatus" class="pill muted">Loading dictionary…</div>
-        <div id="message" class="message"></div>
-      </div>
-
       <div class="hud-side right">
         <div class="hud-row">
           <span id="enemyName" class="hud-label">Enemy</span>
@@ -44,6 +39,11 @@
           <span id="enemyStatus" class="pill enemy-status muted">—</span>
         </div>
       </div>
+    </section>
+
+    <section class="statusbar">
+      <div id="dictStatus" class="pill muted">Loading dictionary…</div>
+      <div id="message" class="message"></div>
     </section>
 
     <section id="board" class="board">
@@ -66,7 +66,12 @@
       </div>
     </section>
 
-    <section id="log" class="log" aria-live="polite"></section>
+    <section id="log" class="log" aria-live="polite">
+      <div class="log-header">
+        <button id="logToggleBtn" class="btn">Show full log</button>
+      </div>
+      <div id="logList"></div>
+    </section>
 
     <!-- Shop overlay -->
     <div id="shopOverlay" class="shop-overlay" aria-hidden="true">
