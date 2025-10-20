@@ -192,12 +192,17 @@ footer {
   align-items: center;
   gap: 16px;
   margin: 0.6rem 0 0.8rem 0;
+  /* Reserve space to prevent layout shift while grid renders */
+  min-height: calc(4 * min(120px, 21vw) + 3 * 12px);
 }
 .grid {
   display: grid;
   grid-template-columns: repeat(4, min(120px, 21vw));
   grid-auto-rows: min(120px, 21vw);
   gap: 12px;
+  /* Fix grid container height to avoid component shifting during render */
+  height: calc(4 * min(120px, 21vw) + 3 * 12px);
+  min-height: calc(4 * min(120px, 21vw) + 3 * 12px);
 }
 .tile {
   display: grid;
@@ -458,6 +463,9 @@ footer {
     grid-template-columns: repeat(4, min(80px, 22vw));
     grid-auto-rows: min(80px, 22vw);
     gap: 10px;
+    /* Match fixed height to mobile tile size + gaps */
+    height: calc(4 * min(80px, 22vw) + 3 * 10px);
+    min-height: calc(4 * min(80px, 22vw) + 3 * 10px);
   }
   .hearts { font-size: 1.15rem; }
 }
@@ -480,6 +488,7 @@ footer {
     display: block;
     width: 360px;
     height: auto;
+    aspect-ratio: 16 / 9; /* reserve height before video metadata loads to prevent shift */
     border-radius: 14px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.12);
     outline: 1px solid rgba(0,0,0,0.06);
