@@ -202,10 +202,19 @@ export function attachGridKeyboard() {
         break;
       case 'Enter':
         e.preventDefault();
+        e.stopPropagation();
         if (submitBtn && !submitBtn.disabled) submitBtn.click();
         break;
       default:
         break;
+    }
+  });
+
+  // Prevent the default \"Enter\" key from triggering a click on the focused tile button
+  gridEl.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
     }
   });
 }
