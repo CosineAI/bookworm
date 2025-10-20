@@ -159,6 +159,3 @@ export function attachGridKeyboard() {
     }
   });
 }
-    }
-  });
-}
