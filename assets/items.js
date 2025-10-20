@@ -2,6 +2,18 @@
 export function createItemPool(ctx) {
   const { activeEffects, setSpawnBias, player, renderHearts } = ctx;
 
+  // Safe helpers in case functions are missing in context
+  const safeSetSpawnBias = (bias) => {
+    if (typeof setSpawnBias === 'function') {
+      setSpawnBias(bias);
+    }
+  };
+  const safeRenderHearts = () => {
+    if (typeof renderHearts === 'function') {
+      renderHearts();
+    }
+  };
+
   return [
     { key: 'holyVowel', name: 'Holy Vowel', desc: 'Double attack for vowels (A, E, I, O, U).',
       apply: () => { activeEffects.holyVowel = true; } },
@@ -18,24 +30,24 @@ export function createItemPool(ctx) {
 
     // Blessings: triple spawn chance of a tile type
     { key: 'blessRed', name: 'Blessing of Red', desc: 'Red tiles appear three times as often.',
-      apply: () => { setSpawnBias({ red: 3 }); } },
+      apply: () => { safeSetSpawnBias({ red: 3 }); } },
     { key: 'blessGreen', name: 'Blessing of Green', desc: 'Green tiles appear three times as often.',
-      apply: () => { setSpawnBias({ green: 3 }); } },
+      apply: () => { safeSetSpawnBias({ green: 3 }); } },
     { key: 'blessGray', name: 'Blessing of Gray', desc: 'Gray tiles appear three times as often.',
-      apply: () => { setSpawnBias({ gray: 3 }); } },
+      apply: () => { safeSetSpawnBias({ gray: 3 }); } },
     { key: 'blessFire', name: 'Blessing of Fire', desc: 'Fire tiles appear three times as often.',
-      apply: () => { setSpawnBias({ fire: 3 }); } },
+      apply: () => { safeSetSpawnBias({ fire: 3 }); } },
     { key: 'blessPoison', name: 'Blessing of Poison', desc: 'Poison tiles appear three times as often.',
-      apply: () => { setSpawnBias({ poison: 3 }); } },
+      apply: () => { safeSetSpawnBias({ poison: 3 }); } },
     { key: 'blessCursed', name: 'Blessing of Cursed', desc: 'Cursed tiles appear three times as often.',
-      apply: () => { setSpawnBias({ cursed: 3 }); } },
+      apply: () => { safeSetSpawnBias({ cursed: 3 }); } },
 
     // Permanent max-heart upgrades
     { key: 'metaphorMail', name: 'Metaphor Mail', desc: '+3 max hearts (permanent).',
-      apply: () => { player.maxHearts += 3; renderHearts(); } },
+      apply: () => { player.maxHearts += 3; safeRenderHearts(); } },
     { key: 'simileShield', name: 'Simile Shield', desc: '+2 max hearts (permanent).',
-      apply: () => { player.maxHearts += 2; renderHearts(); } },
+      apply: () => { player.maxHearts += 2; safeRenderHearts(); } },
     { key: 'personificationPlate', name: 'Personification Plate', desc: '+2 max hearts (permanent).',
-      apply: () => { player.maxHearts += 2; renderHearts(); } },
+      apply: () => { player.maxHearts += 2; safeRenderHearts(); } },
   ];
 }

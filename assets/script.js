@@ -1,6 +1,6 @@
 // Word Battle — Bookworm-like (Refactored to modules, ready for future mechanics)
 import { GRID_SIZE, PLAYER_MAX_HEARTS, HALF, TILE_TYPES, LONG_WORD_SCALING } from './constants.js';
-import { makeTile, badgeFor, effectDescription, setSpawnBias, resetSpawnBias } from './tiles.js';
+import { makeTile, badgeFor, effectDescription, setSpawnBias, resetSpawnBias, getSpawnBias } from './tiles.js';
 import { loadEnglishDictionary } from './dictionary.js';
 import { Combatant } from './combatants.js';
 import { letterDamageHalves } from './letters.js';
@@ -176,6 +176,23 @@ const activeEffects = {
   fireWarAxe: false,
 };
 let shopSelectionMade = false;
+
+// Equipped items tracking and HUD rendering
+let equippedItems = [];
+function renderEquipment() {
+  if (!equipmentListEl) return;
+  equipmentListEl.innerHTML = '';
+  if (!equippedItems || equippedItems.length === 0) {
+    equipmentListEl.textContent = '—';
+    return;
+  }
+  for (const it of equippedItems) {
+    const pill = document.createElement('span');
+    pill.className = 'pill';
+    pill.textContent = it.name;
+    equipmentListEl.appendChild(pill);
+  }
+}
 
 // Status effects
 let nextEnemyAttackHalved = false;
@@ -923,7 +940,8 @@ function equipItem(index) {
   if (shopSelectionMade) return;
   shopSelectionMade = true;
 
-  let item = shopItems[index];
+  let item = shopItems && shopItems[index];
+
   try {
     if (item && typeof item.apply === 'function') {
       item.apply();
@@ -937,19 +955,18 @@ function equipItem(index) {
       log('Shop: No item available to equip. Proceeding to next battle.');
     }
   } catch (e) {
-    // Ensure we still proceed even if item application fails
     console.error('Equip error:', e);
-    log('Shop: Failed to equip item due to an error. Proceeding to next battle.');
+    log(`Shop: Failed to equip item due to an error (${e && e.message ? e.message : 'unknown'}). Proceeding to next battle.`);
+  } finally {
+    // Disable all shop actions to prevent double-activation
+    try { if (healBtn) healBtn.disabled = true; } catch {}
+    try { if (equipItem1Btn) equipItem1Btn.disabled = true; } catch {}
+    try { if (equipItem2Btn) equipItem2Btn.disabled = true; } catch {}
+
+    // Proceed immediately to next battle
+    try { closeShop(); } catch {}
+    try { resetGame(); } catch {}
   }
-
-  // Disable all shop actions to prevent double-activation
-  healBtn.disabled = true;
-  equipItem1Btn.disabled = true;
-  equipItem2Btn.disabled = true;
-
-  // Proceed immediately to next battle
-  closeShop();
-  resetGame();
 }
 
 // Events
