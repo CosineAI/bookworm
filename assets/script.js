@@ -921,16 +921,28 @@ function selectHeal() {
 
 function equipItem(index) {
   if (shopSelectionMade) return;
-  const item = shopItems[index];
-  if (!item) return;
-  item.apply();
-  // Track equipment list (avoid duplicates by key)
-  if (!equippedItems.find(it => it.key === item.key)) {
-    equippedItems.push({ key: item.key, name: item.name });
-  }
-  renderEquipment();
-  log(`Shop: Equipped ${item.name}.`);
   shopSelectionMade = true;
+
+  let item = shopItems[index];
+  try {
+    if (item && typeof item.apply === 'function') {
+      item.apply();
+      // Track equipment list (avoid duplicates by key)
+      if (!equippedItems.find(it => it.key === item.key)) {
+        equippedItems.push({ key: item.key, name: item.name });
+      }
+      renderEquipment();
+      log(`Shop: Equipped ${item.name}.`);
+    } else {
+      log('Shop: No item available to equip. Proceeding to next battle.');
+    }
+  } catch (e) {
+    // Ensure we still proceed even if item application fails
+    console.error('Equip error:', e);
+    log('Shop: Failed to equip item due to an error. Proceeding to next battle.');
+  }
+
+  // Disable all shop actions to prevent double-activation
   healBtn.disabled = true;
   equipItem1Btn.disabled = true;
   equipItem2Btn.disabled = true;
