@@ -177,19 +177,9 @@ function renderItemsList() {
   itemsListEl.innerHTML = '';
   const items = createItemPool({ activeEffects: {}, setSpawnBias: () => {}, player: { maxHearts: 0 }, renderHearts: () => {} });
   for (const it of items) {
-    const row = document.createElement('div');
-    row.className = 'shop-item';
-    const info = document.createElement('div');
-    info.className = 'shop-item-info';
-    const nameEl = document.createElement('strong');
-    nameEl.textContent = it.name;
-    const descEl = document.createElement('div');
-    descEl.className = 'muted';
-    descEl.textContent = it.desc;
-    info.appendChild(nameEl);
-    info.appendChild(descEl);
-    row.appendChild(info);
-    itemsListEl.appendChild(row);
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${it.name}</strong>: ${it.desc}`;
+    itemsListEl.appendChild(li);
   }
 }
 function openRules() {
