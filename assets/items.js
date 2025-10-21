@@ -38,6 +38,16 @@ export function createItemPool(ctx) {
     { key: 'herbalSurge', name: 'Herbal Surge', desc: 'Using 2+ green tiles in a word heals an extra +1 heart.',
       apply: () => { activeEffects.herbalSurge = true; } },
 
+    // Word-based items
+    { key: 'doublingDoubloon', name: 'Doubling Doubloon', desc: 'Adds +½ heart of damage if the word has the same letter twice in a row.',
+      apply: () => { activeEffects.doublingDoubloon = true; } },
+    { key: 'jqzxExpert', name: 'JQZX Expert', desc: 'Triples damage for letters J, Q, Z, X.',
+      apply: () => { activeEffects.jqzxExpert = true; } },
+    { key: 'scrabbler', name: 'Scrabbler', desc: 'Doubles attack for words that are 7 letters or longer.',
+      apply: () => { activeEffects.scrabbler = true; } },
+    { key: 'palindromer', name: 'Palindromer', desc: '×1.5 attack for words that are palindromes.',
+      apply: () => { activeEffects.palindromer = true; } },
+
     // Blessings: triple spawn chance of a tile type
     { key: 'blessRed', name: 'Blessing of Red', desc: 'Red tiles appear three times as often.',
       apply: () => { safeSetSpawnBias({ red: 3 }); } },

@@ -44,6 +44,10 @@ export const state = {
     grayGambit: false,          // Grayscale Gambit
     crimsonEcho: false,         // Crimson Echo
     herbalSurge: false,         // Herbal Surge
+    doublingDoubloon: false,    // Doubling Doubloon
+    jqzxExpert: false,          // JQZX Expert
+    scrabbler: false,           // Scrabbler
+    palindromer: false,         // Palindromer
   },
   shopSelectionMade: false,
   equippedItems: [],

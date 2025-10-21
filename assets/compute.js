@@ -13,11 +13,40 @@ function countFireTiles() {
   return n;
 }
 
+function getCurrentWordFromSelection() {
+  return state.selected.map((p) => {
+    const cell = state.grid[p.r][p.c];
+    return cell && cell.ch ? String(cell.ch) : '';
+  }).join('');
+}
+
+function isPalindromeStr(s) {
+  if (!s) return false;
+  const up = s.toUpperCase();
+  const len = up.length;
+  for (let i = 0; i < Math.floor(len / 2); i++) {
+    if (up[i] !== up[len - 1 - i]) return false;
+  }
+  return true;
+}
+
+function hasDoubleAdjacent(s) {
+  if (!s) return false;
+  const up = s.toUpperCase();
+  for (let i = 1; i < up.length; i++) {
+    if (up[i] === up[i - 1]) return true;
+  }
+  return false;
+}
+
 export function computeAttackInfo() {
   let attackHalvesFloat = 0;
   let healHalves = 0;
   const letters = state.selected.length;
   const vowels = new Set(['A', 'E', 'I', 'O', 'U']);
+  const heavyLetters = new Set(['J', 'Q', 'Z', 'X']);
+  const currentWord = getCurrentWordFromSelection();
+
   let cursedCount = 0;
   const effects = new Set();
   let usedHolyVowel = false;
@@ -34,7 +63,9 @@ export function computeAttackInfo() {
     if (!cell) continue;
     const base = letterDamageHalves(cell.ch);
     let contribution = base / 2;
-    const isVowel = vowels.has(String(cell.ch).toUpperCase());
+    const chUp = String(cell.ch).toUpperCase();
+    const isVowel = vowels.has(chUp);
+    const isHeavy = heavyLetters.has(chUp);
 
     if (isVowel && state.activeEffects.holyVowel) usedHolyVowel = true;
     switch (cell.type) {
@@ -54,6 +85,7 @@ export function computeAttackInfo() {
         let mult = 2;
         if (state.activeEffects.redEnhanced) mult *= 2;
         if (state.activeEffects.holyVowel && isVowel) mult *= 2;
+        if (state.activeEffects.jqzxExpert && isHeavy) mult *= 3;
         attackHalvesFloat += contribution * mult;
         break;
       }
@@ -61,6 +93,7 @@ export function computeAttackInfo() {
       case 'green': {
         let mult = 1;
         if (state.activeEffects.holyVowel && isVowel) mult *= 2;
+        if (state.activeEffects.jqzxExpert && isHeavy) mult *= 3;
         attackHalvesFloat += contribution * mult;
         healHalves += state.activeEffects.healingStaff ? 2 : 1;
         break;
@@ -70,6 +103,7 @@ export function computeAttackInfo() {
         if (state.activeEffects.grayGoggles) {
           let mult = 1;
           if (state.activeEffects.holyVowel && isVowel) mult *= 2;
+          if (state.activeEffects.jqzxExpert && isHeavy) mult *= 3;
           attackHalvesFloat += contribution * mult * 0.5;
         } else {
           attackHalvesFloat += 0;
@@ -79,18 +113,21 @@ export function computeAttackInfo() {
       case TILE_TYPES.FIRE: {
         let mult = 1;
         if (state.activeEffects.holyVowel && isVowel) mult *= 2;
+        if (state.activeEffects.jqzxExpert && isHeavy) mult *= 3;
         attackHalvesFloat += contribution * mult;
         break;
       }
       case TILE_TYPES.POISON: {
         let mult = 1;
         if (state.activeEffects.holyVowel && isVowel) mult *= 2;
+        if (state.activeEffects.jqzxExpert && isHeavy) mult *= 3;
         attackHalvesFloat += contribution * mult;
         break;
       }
       case TILE_TYPES.CURSED: {
         let mult = 1;
         if (state.activeEffects.holyVowel && isVowel) mult *= 2;
+        if (state.activeEffects.jqzxExpert && isHeavy) mult *= 3;
         attackHalvesFloat += contribution * mult;
         cursedCount += 1;
         break;
@@ -98,12 +135,14 @@ export function computeAttackInfo() {
       case TILE_TYPES.FROZEN: {
         let mult = 1;
         if (state.activeEffects.holyVowel && isVowel) mult *= 2;
+        if (state.activeEffects.jqzxExpert && isHeavy) mult *= 3;
         attackHalvesFloat += contribution * mult;
         break;
       }
       default: {
         let mult = 1;
         if (state.activeEffects.holyVowel && isVowel) mult *= 2;
+        if (state.activeEffects.jqzxExpert && isHeavy) mult *= 3;
         attackHalvesFloat += contribution * mult;
       }
     }
@@ -137,6 +176,24 @@ export function computeAttackInfo() {
       effects.add('long_word_scaling');
       attackHalvesFloat *= mult;
     }
+  }
+
+  // Scrabbler: doubles attack for words 7+ letters
+  if (state.activeEffects.scrabbler && letters >= 7) {
+    attackHalvesFloat *= 2;
+    effects.add('scrabbler');
+  }
+
+  // Doubling Doubloon: +½ if any adjacent duplicate letters in the word
+  if (state.activeEffects.doublingDoubloon && hasDoubleAdjacent(currentWord)) {
+    attackHalvesFloat += 1;
+    effects.add('doubling_doubloon');
+  }
+
+  // Palindromer: ×1.5 attack if the word is a palindrome
+  if (state.activeEffects.palindromer && isPalindromeStr(currentWord)) {
+    attackHalvesFloat *= 1.5;
+    effects.add('palindromer');
   }
 
   // Grayscale Gambit: +½ if any gray tile is used (non-stackable)
