@@ -346,14 +346,38 @@ footer {
 
 /* Falling animation for newly refilled letters */
 .tile.fall-in {
-  animation: fallIn 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  will-change: transform, opacity;
+  animation: fallIn 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  will-change: transform;
 }
 
 @keyframes fallIn {
-  0%   { transform: translateY(-64px); opacity: 0; }
-  70%  { transform: translateY(6px); opacity: 1; }
+  0%   { transform: translateY(-64px); }
+  70%  { transform: translateY(2px); }
+  100% { transform: translateY(0); }
+}
+
+/* Gravity drop animation for existing tiles moving down */
+.tile.drop {
+  animation: dropDown 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 120ms;        /* small lag before dropping */
+  animation-fill-mode: both;     /* apply 0% styles during the delay */
+  will-change: transform, opacity;
+}
+
+/* Uses CSS variables:
+   --drop-rows: how many rows the tile moved down (integer)
+   --grid-gap: gap size in px set on the grid container (row gap) */
+@keyframes dropDown {
+  /* Start from the original spot (visible), then drop to the new settled position */
+  0%   { transform: translateY(calc(-1 * var(--drop-rows, 0) * (100% + var(--grid-gap, 12px)))); opacity: 1; }
+  70%  { transform: translateY(2px); opacity: 1; }
   100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Invisible placeholder during gravity phase to keep layout stable */
+.tile.empty {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .wordbar {
@@ -399,6 +423,12 @@ footer {
 .btn:focus {
   outline: 3px solid rgba(37,99,235,0.6);
   outline-offset: 2px;
+}
+/* Active game mode ring */
+.btn.mode-active {
+  outline: 4px solid #1f2937;
+  outline-offset: 2px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 .btn.primary {
   background: #2f6f3e; /* forest green */
@@ -510,6 +540,24 @@ footer {
   display: flex;
   justify-content: flex-end;
   margin-top: 1.0rem;
+}
+
+/* Rules modal scroll container */
+.rules-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-top: .6rem;
+  padding-right: 8px; /* prevent scrollbar overlaying content */
+}
+
+/* Better list formatting for tile effects */
+.rules-list {
+  margin: .3rem 0 0;
+  padding-left: 1.2rem;
+}
+.rules-list li {
+  margin: .2rem 0;
+  line-height: 1.4;
 }
 
 @media (max-width: 850px) {

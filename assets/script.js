@@ -17,6 +17,9 @@ import {
   dictStatusEl,
   hardModeBtn,
   extremeModeBtn,
+  rulesBtn,
+  rulesOverlay,
+  rulesCloseBtn,
 } from './dom.js';
 import { state, setDictionarySet, initEnemySpecial } from './state.js';
 import { renderHearts, updateEnemyNameUI, updateEnemyStatusUI, renderEquipment, log, renderLog, message, updateWordUI, attachGridKeyboard } from './ui.js';
@@ -46,6 +49,14 @@ async function initDictionary() {
     message('Failed to load dictionary. Please check your connection.', 'bad');
     // Attack remains disabled because dictionarySet is null
   }
+}
+
+// UI: reflect current mode with a ring around the active button
+function updateModeUI() {
+  const m = state.difficultyMultiplier || 1;
+  if (newRunBtn) newRunBtn.classList.toggle('mode-active', Math.abs(m - 1.0) < 0.01);
+  if (hardModeBtn) hardModeBtn.classList.toggle('mode-active', Math.abs(m - 1.5) < 0.01);
+  if (extremeModeBtn) extremeModeBtn.classList.toggle('mode-active', Math.abs(m - 2.0) < 0.01);
 }
 
 // Events
@@ -104,15 +115,20 @@ shuffleBtn.addEventListener('click', () => {
 });
 
 newGameBtn.addEventListener('click', () => {
+  // New Game resets to Normal mode
+  state.difficultyMultiplier = 1;
   startNewRun();
+  updateModeUI();
 });
 
 // Difficulty mode events
 hardModeBtn.addEventListener('click', () => {
   startNewRunHard();
+  updateModeUI();
 });
 extremeModeBtn.addEventListener('click', () => {
   startNewRunExtreme();
+  updateModeUI();
 });
 
 // Shop events
@@ -131,8 +147,37 @@ window.addEventListener('shop:proceed', () => {
 
 endingRestartBtn.addEventListener('click', () => {
   closeEnding();
+  // Restart in Normal mode
+  state.difficultyMultiplier = 1;
   startNewRun();
+  updateModeUI();
 });
+
+// Rules modal toggle
+function openRules() {
+  if (!rulesOverlay) return;
+  rulesOverlay.classList.add('show');
+  rulesOverlay.setAttribute('aria-hidden', 'false');
+}
+function closeRules() {
+  if (!rulesOverlay) return;
+  rulesOverlay.classList.remove('show');
+  rulesOverlay.setAttribute('aria-hidden', 'true');
+}
+if (rulesBtn) {
+  rulesBtn.addEventListener('click', () => {
+    const open = rulesOverlay && rulesOverlay.classList.contains('show');
+    if (open) closeRules(); else openRules();
+  });
+}
+if (rulesCloseBtn) {
+  rulesCloseBtn.addEventListener('click', () => closeRules());
+}
+if (rulesOverlay) {
+  rulesOverlay.addEventListener('click', (e) => {
+    if (e.target === rulesOverlay) closeRules();
+  });
+}
 
 // Log toggle
 if (logToggleBtn) {
@@ -153,7 +198,10 @@ window.addEventListener('grid:tile-click', (e) => {
 
 // New Run button
 newRunBtn.addEventListener('click', () => {
+  // Footer New Game resets to Normal mode
+  state.difficultyMultiplier = 1;
   startNewRun();
+  updateModeUI();
 });
 
 // Kick off
@@ -167,3 +215,4 @@ updateEnemyNameUI();
 updateEnemyStatusUI();
 renderEquipment();
 log(`Enemy: ${state.enemy.name}.`);
+updateModeUI();

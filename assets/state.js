@@ -12,6 +12,8 @@ export const state = {
   selectedSet: new Set(),
   gameOver: false,
   refillAnimSet: new Set(),
+  // Rows dropped per tile position during gravity phase: Map<'r,c', number>
+  dropAnimRowsMap: new Map(),
   keyboardFocus: { r: 0, c: 0 },
 
   // Log

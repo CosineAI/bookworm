@@ -89,6 +89,8 @@ export function startNewRun() {
   state.gameOver = false;
   clearRunStats();
   resetItemsAndEffects();
+  // Ensure player health resets to full for a fresh run
+  state.player.hp = state.player.maxHearts * HALF;
   state.nextEnemyAttackHalved = false;
 
   resetEnemyToFirst();
