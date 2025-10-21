@@ -48,6 +48,9 @@ export const state = {
     jqzxExpert: false,          // JQZX Expert
     scrabbler: false,           // Scrabbler
     palindromer: false,         // Palindromer
+    mirrorEdge: false,          // Mirror Edge
+    vowelSuite: false,          // Vowel Suite
+    suffixSpecialist: false,    // Suffix Specialist
   },
   shopSelectionMade: false,
   equippedItems: [],

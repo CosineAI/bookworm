@@ -196,6 +196,38 @@ export function computeAttackInfo() {
     effects.add('palindromer');
   }
 
+  // Mirror Edge: +½ if first and last letters match
+  if (state.activeEffects.mirrorEdge && currentWord && currentWord.length > 0) {
+    const up = currentWord.toUpperCase();
+    if (up[0] === up[up.length - 1]) {
+      attackHalvesFloat += 1;
+      effects.add('mirror_edge');
+    }
+  }
+
+  // Vowel Suite: ×1.5 if word has 4+ distinct vowels
+  if (state.activeEffects.vowelSuite && currentWord && currentWord.length > 0) {
+    const up = currentWord.toUpperCase();
+    const vset = new Set();
+    for (let i = 0; i < up.length; i++) {
+      const ch = up[i];
+      if (ch === 'A' || ch === 'E' || ch === 'I' || ch === 'O' || ch === 'U') vset.add(ch);
+    }
+    if (vset.size >= 4) {
+      attackHalvesFloat *= 1.5;
+      effects.add('vowel_suite');
+    }
+  }
+
+  // Suffix Specialist: ×1.25 if the word ends with ING, ED, or ER
+  if (state.activeEffects.suffixSpecialist && currentWord && currentWord.length > 0) {
+    const up = currentWord.toUpperCase();
+    if (up.endsWith('ING') || up.endsWith('ED') || up.endsWith('ER')) {
+      attackHalvesFloat *= 1.25;
+      effects.add('suffix_specialist');
+    }
+  }
+
   // Grayscale Gambit: +½ if any gray tile is used (non-stackable)
   if (usedGray && state.activeEffects.grayGambit) {
     attackHalvesFloat += 1;

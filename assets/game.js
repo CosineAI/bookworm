@@ -23,6 +23,13 @@ export function resetItemsAndEffects() {
   state.activeEffects.grayGambit = false;
   state.activeEffects.crimsonEcho = false;
   state.activeEffects.herbalSurge = false;
+  state.activeEffects.doublingDoubloon = false;
+  state.activeEffects.jqzxExpert = false;
+  state.activeEffects.scrabbler = false;
+  state.activeEffects.palindromer = false;
+  state.activeEffects.mirrorEdge = false;
+  state.activeEffects.vowelSuite = false;
+  state.activeEffects.suffixSpecialist = false;
 
   resetSpawnBias();
 

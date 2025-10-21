@@ -47,6 +47,12 @@ export function createItemPool(ctx) {
       apply: () => { activeEffects.scrabbler = true; } },
     { key: 'palindromer', name: 'Palindromer', desc: '×1.5 attack for words that are palindromes.',
       apply: () => { activeEffects.palindromer = true; } },
+    { key: 'mirrorEdge', name: 'Mirror Edge', desc: 'Adds +½ heart of damage if the word’s first and last letters match.',
+      apply: () => { activeEffects.mirrorEdge = true; } },
+    { key: 'vowelSuite', name: 'Vowel Suite', desc: '×1.5 attack if the word contains four or more distinct vowels.',
+      apply: () => { activeEffects.vowelSuite = true; } },
+    { key: 'suffixSpecialist', name: 'Suffix Specialist', desc: '×1.25 attack if the word ends with “ING”, “ED”, or “ER”.',
+      apply: () => { activeEffects.suffixSpecialist = true; } },
 
     // Blessings: triple spawn chance of a tile type
     { key: 'blessRed', name: 'Blessing of Red', desc: 'Red tiles appear three times as often.',
