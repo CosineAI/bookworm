@@ -44,10 +44,19 @@ export function gameWon() {
   }
 }
 
+// Mode label helper
+function currentModeLabel() {
+  const m = state.difficultyMultiplier || 1;
+  if (Math.abs(m - 2.0) < 0.01) return 'Extreme';
+  if (Math.abs(m - 1.5) < 0.01) return 'Hard';
+  return 'Normal';
+}
+
 export function gameLost() {
   state.gameOver = true;
-  message('You were defeated. Try again.', 'bad');
-  log('💀 Defeat. The enemy outlasted you.');
+  const mode = currentModeLabel();
+  message(`You were defeated (${mode} mode). Try again.`, 'bad');
+  log(`💀 Defeat (${mode} mode). The enemy outlasted you.`);
   submitBtn.disabled = true;
   shuffleBtn.disabled = true;
   showRunStats('Run stats');
