@@ -382,6 +382,7 @@ footer {
 
 .wordbar {
   margin-top: 1.0rem;
+  margin-bottom: .4rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -570,6 +571,11 @@ footer {
     grid-auto-rows: min(80px, 22vw);
     gap: 10px;
     /* Match fixed height to mobile tile size + gaps */
+    height: calc(4 * min(80px, 22vw) + 3 * 10px);
+    min-height: calc(4 * min(80px, 22vw) + 3 * 10px);
+  }
+  /* Ensure the board container tightly fits the grid on smaller screens */
+  .board {
     height: calc(4 * min(80px, 22vw) + 3 * 10px);
     min-height: calc(4 * min(80px, 22vw) + 3 * 10px);
   }
