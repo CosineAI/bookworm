@@ -14,10 +14,11 @@ export function initGrid() {
 export function renderGrid() {
   gridEl.innerHTML = '';
 
-  // Keep grid gap available to animations as a CSS variable
+  // Keep grid row-gap available to animations as a CSS variable
   try {
-    const gap = window.getComputedStyle(gridEl).gap;
-    if (gap) gridEl.style.setProperty('--grid-gap', gap);
+    const cs = window.getComputedStyle(gridEl);
+    const rowGap = cs.rowGap || cs.gap;
+    if (rowGap) gridEl.style.setProperty('--grid-gap', rowGap);
   } catch {}
 
   for (let r = 0; r < GRID_SIZE; r++) {

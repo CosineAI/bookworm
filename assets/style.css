@@ -366,9 +366,10 @@ footer {
 
 /* Uses CSS variables:
    --drop-rows: how many rows the tile moved down (integer)
-   --grid-gap: gap size in px set on the grid container */
+   --grid-gap: gap size in px set on the grid container (row gap) */
 @keyframes dropDown {
-  0%   { transform: translateY(calc(-1 * var(--drop-rows, 0) * (100% + var(--grid-gap, 12px)))); opacity: 0; }
+  /* Start from the original spot (visible), then drop to the new settled position */
+  0%   { transform: translateY(calc(-1 * var(--drop-rows, 0) * (100% + var(--grid-gap, 12px)))); opacity: 1; }
   70%  { transform: translateY(6px); opacity: 1; }
   100% { transform: translateY(0); opacity: 1; }
 }
