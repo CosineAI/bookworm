@@ -10,7 +10,8 @@ export function grayOutRandomTiles(count) {
   const pool = [];
   for (let r = 0; r < state.grid.length; r++) {
     for (let c = 0; c < state.grid[r].length; c++) {
-      if (state.grid[r][c].type !== TILE_TYPES.GRAY) pool.push({ r, c });
+      const t = state.grid[r][c];
+      if (t && !t.empty && t.type !== TILE_TYPES.GRAY) pool.push({ r, c });
     }
   }
   if (pool.length === 0 || count <= 0) return 0;
@@ -31,7 +32,8 @@ export function igniteRandomTiles(count) {
   const pool = [];
   for (let r = 0; r < state.grid.length; r++) {
     for (let c = 0; c < state.grid[r].length; c++) {
-      if (state.grid[r][c].type !== TILE_TYPES.FIRE) pool.push({ r, c });
+      const t = state.grid[r][c];
+      if (t && !t.empty && t.type !== TILE_TYPES.FIRE) pool.push({ r, c });
     }
   }
   if (pool.length === 0 || count <= 0) return 0;
@@ -88,7 +90,8 @@ export function countFireTiles() {
   let n = 0;
   for (let r = 0; r < state.grid.length; r++) {
     for (let c = 0; c < state.grid[r].length; c++) {
-      if (state.grid[r][c].type === TILE_TYPES.FIRE) n++;
+      const t = state.grid[r][c];
+      if (t && !t.empty && t.type === TILE_TYPES.FIRE) n++;
     }
   }
   return n;
@@ -98,7 +101,8 @@ export function countFrozenTiles() {
   let n = 0;
   for (let r = 0; r < state.grid.length; r++) {
     for (let c = 0; c < state.grid[r].length; c++) {
-      if (state.grid[r][c].type === TILE_TYPES.FROZEN) n++;
+      const t = state.grid[r][c];
+      if (t && !t.empty && t.type === TILE_TYPES.FROZEN) n++;
     }
   }
   return n;

@@ -356,6 +356,27 @@ footer {
   100% { transform: translateY(0); opacity: 1; }
 }
 
+/* Gravity drop animation for existing tiles moving down */
+.tile.drop {
+  animation: dropDown 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Uses CSS variables:
+   --drop-rows: how many rows the tile moved down (integer)
+   --grid-gap: gap size in px set on the grid container */
+@keyframes dropDown {
+  0%   { transform: translateY(calc(-1 * var(--drop-rows, 0) * (100% + var(--grid-gap, 12px)))); opacity: 0; }
+  70%  { transform: translateY(6px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Invisible placeholder during gravity phase to keep layout stable */
+.tile.empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .wordbar {
   margin-top: 1.0rem;
   display: flex;
