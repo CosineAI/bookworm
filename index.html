@@ -29,8 +29,10 @@
           <span class="muted">= sum of tile values</span>
         </div>
         <div class="hud-row small">
-          <span class="hud-label">Equipment</span>
-          <div id="equipmentList" class="equip-list"></div>
+          <details id="equipmentDetails" class="equip-details">
+            <summary class="hud-label">Equipment</summary>
+            <div id="equipmentList" class="equip-list"></div>
+          </details>
         </div>
       </div>
 
@@ -46,11 +48,6 @@
       </div>
     </section>
 
-    <section class="statusbar">
-      <div id="dictStatus" class="pill muted">Loading dictionary…</div>
-      <div id="message" class="message"></div>
-    </section>
-
     <section id="board" class="board">
       <!-- Knight video, aligned with the grid -->
       <video
@@ -64,6 +61,11 @@
         aria-label="Decorative knight video"
       ></video>
       <div id="grid" class="grid" aria-label="Letter grid"></div>
+    </section>
+
+    <section class="statusbar">
+      <div id="dictStatus" class="pill muted">Loading dictionary…</div>
+      <div id="message" class="message"></div>
     </section>
 
     <section class="wordbar">

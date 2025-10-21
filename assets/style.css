@@ -166,6 +166,19 @@ footer {
   color: #3a2e1a
 }
 
+/* Expandable equipment container */
+.equip-details {
+  width: 100%;
+}
+.equip-details summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-block;
+}
+.equip-details .equip-list {
+  margin-top: .35rem;
+}
+
 .pill {
   padding: .35rem .65rem;
   border-radius: 999px;
