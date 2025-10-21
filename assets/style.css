@@ -352,7 +352,7 @@ footer {
 
 @keyframes fallIn {
   0%   { transform: translateY(-64px); opacity: 0; }
-  70%  { transform: translateY(6px); opacity: 1; }
+  70%  { transform: translateY(2px); opacity: 1; }
   100% { transform: translateY(0); opacity: 1; }
 }
 
@@ -370,7 +370,7 @@ footer {
 @keyframes dropDown {
   /* Start from the original spot (visible), then drop to the new settled position */
   0%   { transform: translateY(calc(-1 * var(--drop-rows, 0) * (100% + var(--grid-gap, 12px)))); opacity: 1; }
-  70%  { transform: translateY(6px); opacity: 1; }
+  70%  { transform: translateY(2px); opacity: 1; }
   100% { transform: translateY(0); opacity: 1; }
 }
 
