@@ -56,9 +56,8 @@ export function renderGrid() {
       // Phase 2: new tiles fall from the top
       if (state.refillAnimSet.has(key)) {
         btn.classList.add('fall-in');
-        // Stagger by row from bottom to top: bottom first, then up
-        const rowOrderDelayMs = (GRID_SIZE - 1 - r) * 100;
-        btn.style.animationDelay = `${rowOrderDelayMs}ms`;
+        // No stagger: all new tiles fall together
+        btn.style.animationDelay = '0ms';
       }
 
       // Phase 1: existing tiles dropping down
@@ -67,9 +66,7 @@ export function renderGrid() {
         if (rows > 0) {
           btn.classList.add('drop');
           btn.style.setProperty('--drop-rows', String(rows));
-          // Stagger drop by row from bottom to top to avoid visual glitches when multiple tiles drop in a column
-          const rowOrderDelayMs = 120 + (GRID_SIZE - 1 - r) * 100;
-          btn.style.animationDelay = `${rowOrderDelayMs}ms`;
+          // No stagger: let CSS base delay apply uniformly
         }
       }
 
@@ -166,9 +163,8 @@ export function refillUsedTiles(used) {
   renderGrid();
 
   // Phase 2: after drop animation completes, create new tiles at the top and animate them falling in.
-  // Keep in sync with CSS: .tile.drop has 120ms base delay + per-row stagger + 0.9s duration.
-  // Max stagger occurs on the top row: 120ms + ((GRID_SIZE - 1) * 100ms) + 900ms ≈ 1320ms.
-  const DROP_MS = 1320;
+  // Keep in sync with CSS: .tile.drop has 120ms base delay + 0.9s duration ≈ 1020ms total.
+  const DROP_MS = 1020;
   setTimeout(() => {
     let needRefill = false;
     for (let r = 0; r < GRID_SIZE; r++) {
