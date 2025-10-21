@@ -347,13 +347,13 @@ footer {
 /* Falling animation for newly refilled letters */
 .tile.fall-in {
   animation: fallIn 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  will-change: transform, opacity;
+  will-change: transform;
 }
 
 @keyframes fallIn {
-  0%   { transform: translateY(-64px); opacity: 0; }
-  70%  { transform: translateY(2px); opacity: 1; }
-  100% { transform: translateY(0); opacity: 1; }
+  0%   { transform: translateY(-64px); }
+  70%  { transform: translateY(2px); }
+  100% { transform: translateY(0); }
 }
 
 /* Gravity drop animation for existing tiles moving down */
