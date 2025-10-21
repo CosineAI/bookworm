@@ -41,3 +41,8 @@ export const endingLongestEl = document.getElementById('endingLongest');
 export const endingHighestEl = document.getElementById('endingHighest');
 export const endingEffectsEl = document.getElementById('endingEffects');
 export const endingRestartBtn = document.getElementById('endingRestartBtn');
+
+// Rules DOM
+export const rulesOverlay = document.getElementById('rulesOverlay');
+export const rulesBtn = document.getElementById('rulesBtn');
+export const rulesCloseBtn = document.getElementById('rulesCloseBtn');

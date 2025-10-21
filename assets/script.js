@@ -17,6 +17,9 @@ import {
   dictStatusEl,
   hardModeBtn,
   extremeModeBtn,
+  rulesBtn,
+  rulesOverlay,
+  rulesCloseBtn,
 } from './dom.js';
 import { state, setDictionarySet, initEnemySpecial } from './state.js';
 import { renderHearts, updateEnemyNameUI, updateEnemyStatusUI, renderEquipment, log, renderLog, message, updateWordUI, attachGridKeyboard } from './ui.js';
@@ -133,6 +136,32 @@ endingRestartBtn.addEventListener('click', () => {
   closeEnding();
   startNewRun();
 });
+
+// Rules modal toggle
+function openRules() {
+  if (!rulesOverlay) return;
+  rulesOverlay.classList.add('show');
+  rulesOverlay.setAttribute('aria-hidden', 'false');
+}
+function closeRules() {
+  if (!rulesOverlay) return;
+  rulesOverlay.classList.remove('show');
+  rulesOverlay.setAttribute('aria-hidden', 'true');
+}
+if (rulesBtn) {
+  rulesBtn.addEventListener('click', () => {
+    const open = rulesOverlay && rulesOverlay.classList.contains('show');
+    if (open) closeRules(); else openRules();
+  });
+}
+if (rulesCloseBtn) {
+  rulesCloseBtn.addEventListener('click', () => closeRules());
+}
+if (rulesOverlay) {
+  rulesOverlay.addEventListener('click', (e) => {
+    if (e.target === rulesOverlay) closeRules();
+  });
+}
 
 // Log toggle
 if (logToggleBtn) {

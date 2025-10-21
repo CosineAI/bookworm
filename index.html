@@ -91,6 +91,7 @@
       <div id="logList"></div>
       <div class="log-header" style="margin-top:.6rem;">
         <button id="newRunBtn" class="btn success">New Game</button>
+        <button id="rulesBtn" class="btn">How to Play</button>
         <button id="hardModeBtn" class="btn warning">Hard Mode</button>
         <button id="extremeModeBtn" class="btn danger">Extreme Mode</button>
       </div>
@@ -160,6 +161,49 @@
         </div>
         <div class="shop-actions">
           <button id="endingRestartBtn" class="btn primary">New Run</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rules / Introduction overlay -->
+    <div id="rulesOverlay" class="shop-overlay" aria-hidden="true">
+      <div class="shop-modal" role="dialog" aria-labelledby="rulesTitle" aria-modal="true">
+        <h2 id="rulesTitle">How to Play</h2>
+        <p class="muted" style="margin-top:.2rem;">Form valid words to attack, manage effects, and defeat enemies.</p>
+        <div class="shop-items">
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Basics</strong>
+              <div class="muted">Select letters to form a valid English word (2+ letters). Attack value is computed from your tiles. New tiles drop in after each turn.</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Tile Effects</strong>
+              <div class="muted">Red: double damage • Green: heal ½ • Gray: no damage • Fire: burns you each enemy turn • Poison: halves enemy’s next attack • Cursed: odd count halves, even ×1.5 • Frozen: halves attack but enemy skips their turn.</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Enemy Turns</strong>
+              <div class="muted">Enemies strike each turn and may apply specials or debuffs (gray/fire tiles). Fire hazards deal damage based on fire tiles present.</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Between Battles</strong>
+              <div class="muted">Choose ONE: heal to full OR equip one item. Equipment modifies effects or spawn rates.</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Difficulty</strong>
+              <div class="muted">Normal, Hard, Extreme increase enemy HP.</div>
+            </div>
+          </div>
+        </div>
+        <div class="shop-actions">
+          <button id="rulesCloseBtn" class="btn primary">Close</button>
         </div>
       </div>
     </div>

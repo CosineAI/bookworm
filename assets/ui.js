@@ -16,6 +16,7 @@ import {
   equipmentListEl,
   mainEl,
   shopOverlay,
+  rulesOverlay,
 } from './dom.js';
 import { computeAttackInfo } from './compute.js';
 import { GRID_SIZE } from './constants.js';
@@ -161,6 +162,7 @@ export function attachGridKeyboard() {
   gridEl.addEventListener('keydown', (e) => {
     if (state.gameOver) return;
     if (shopOverlay && shopOverlay.classList.contains('show')) return;
+    if (rulesOverlay && rulesOverlay.classList.contains('show')) return;
 
     const posAttr = e.target && e.target.getAttribute ? e.target.getAttribute('data-pos') : null;
     let r = state.keyboardFocus?.r ?? 0;
@@ -210,7 +212,7 @@ export function attachGridKeyboard() {
     }
   });
 
-  // Prevent the default \"Enter\" key from triggering a click on the focused tile button
+  // Prevent the default "Enter" key from triggering a click on the focused tile button
   gridEl.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
