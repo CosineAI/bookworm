@@ -75,7 +75,12 @@ footer {
   gap: .35rem;
 }
 .hud-side.right {
-  align-items: flex-end;
+  align-items: flex-start;
+}
+/* Ensure rows in enemy column take full width so "Next" aligns with enemy name */
+.hud-side.right .hud-row {
+  width: 100%;
+  justify-content: flex-start;
 }
 .hud-row {
   display: flex;
@@ -104,6 +109,8 @@ footer {
   display: inline-flex;
   gap: 4px;
   letter-spacing: 0; /* spacing now handled by gap */
+  flex-wrap: wrap;   /* allow hearts to wrap onto multiple lines */
+  white-space: normal;
 }
 .heart {
   position: relative;
