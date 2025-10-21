@@ -160,7 +160,8 @@ export function refillUsedTiles(used) {
   renderGrid();
 
   // Phase 2: after drop animation completes, create new tiles at the top and animate them falling in.
-  const DROP_MS = 500; // keep in sync with .tile.drop animation
+  // Keep in sync with CSS: .tile.drop has 120ms delay + 0.9s duration = ~1050ms total
+  const DROP_MS = 1050;
   setTimeout(() => {
     let needRefill = false;
     for (let r = 0; r < GRID_SIZE; r++) {
