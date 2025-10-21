@@ -16,21 +16,58 @@ body {
 }
 
 header {
-  background: #1b3a2e;
+  position: relative;
+  /* Wood signboard background with subtle grain */
+  background:
+    linear-gradient(180deg, #c8a165 0%, #a4743b 100%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 3px, rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 6px);
   color: #f3e8a1;
-  padding: 0; /* remove header padding */
+  padding: 0; /* keep header padding removed as requested */
   text-align: center;
   letter-spacing: 0.02em;
-  box-shadow: 0 2px 10px rgba(40,40,40,0.12);
+  border: 8px solid #6b4f2a; /* wood edge */
+  border-radius: 18px;        /* rounded signboard corners */
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.12);
 }
+/* Hanging ropes */
+header::before,
+header::after {
+  content: "";
+  position: absolute;
+  top: -28px;
+  width: 8px;
+  height: 38px;
+  background: repeating-linear-gradient(180deg, #d2b48c 0px, #b48a62 6px, #a8794f 12px);
+  border-radius: 6px;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+}
+header::before { left: 18%; }
+header::after  { right: 18%; }
+
 header h1 {
+  position: relative; /* allow decorative fasteners */
   font-family: "Jacquard 24", serif;
   color: #f3e8a1;
   font-weight: 400;
   letter-spacing: 0.04em;
   font-size: 9rem;
   line-height: 0.9;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.18); /* slight engraved effect */
 }
+/* Iron fasteners on the signboard */
+header h1::before,
+header h1::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3f3f46;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.08), 0 2px 0 rgba(0,0,0,0.25);
+}
+header h1::before { left: 18%; }
+header h1::after  { right: 18%; }
 
 main {
   flex: 1 0 auto;
