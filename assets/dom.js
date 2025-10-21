@@ -54,3 +54,4 @@ export const defeatRestartBtn = document.getElementById('defeatRestartBtn');
 export const rulesOverlay = document.getElementById('rulesOverlay');
 export const rulesBtn = document.getElementById('rulesBtn');
 export const rulesCloseBtn = document.getElementById('rulesCloseBtn');
+export const itemsListEl = document.getElementById('itemsList');

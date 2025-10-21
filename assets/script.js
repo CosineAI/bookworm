@@ -21,6 +21,7 @@ import {
   rulesBtn,
   rulesOverlay,
   rulesCloseBtn,
+  itemsListEl,
 } from './dom.js';
 import { state, setDictionarySet, initEnemySpecial } from './state.js';
 import { renderHearts, updateEnemyNameUI, updateEnemyStatusUI, renderEquipment, log, renderLog, message, updateWordUI, attachGridKeyboard } from './ui.js';
@@ -31,6 +32,7 @@ import { openShop, closeShop, selectHeal, equipItem } from './shop.js';
 import { closeEnding, closeDefeat } from './endings.js';
 import { updateStats } from './stats.js';
 import { resetGame, startNewRun, gameWon, gameLost, startNewRunHard, startNewRunExtreme } from './game.js';
+import { createItemPool } from './items.js';
 
 function isValidWord(w) {
   if (!w || w.length < 2) return false;
@@ -170,8 +172,29 @@ defeatRestartBtn.addEventListener('click', () => {
 });
 
 // Rules modal toggle
+function renderItemsList() {
+  if (!itemsListEl) return;
+  itemsListEl.innerHTML = '';
+  const items = createItemPool({ activeEffects: {}, setSpawnBias: () => {}, player: { maxHearts: 0 }, renderHearts: () => {} });
+  for (const it of items) {
+    const row = document.createElement('div');
+    row.className = 'shop-item';
+    const info = document.createElement('div');
+    info.className = 'shop-item-info';
+    const nameEl = document.createElement('strong');
+    nameEl.textContent = it.name;
+    const descEl = document.createElement('div');
+    descEl.className = 'muted';
+    descEl.textContent = it.desc;
+    info.appendChild(nameEl);
+    info.appendChild(descEl);
+    row.appendChild(info);
+    itemsListEl.appendChild(row);
+  }
+}
 function openRules() {
   if (!rulesOverlay) return;
+  renderItemsList();
   rulesOverlay.classList.add('show');
   rulesOverlay.setAttribute('aria-hidden', 'false');
 }
