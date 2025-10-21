@@ -7,6 +7,7 @@ import {
   clearBtn,
   shuffleBtn,
   newGameBtn,
+  newRunBtn,
   logToggleBtn,
   healBtn,
   equipItem1Btn,
@@ -14,6 +15,8 @@ import {
   continueBtn,
   endingRestartBtn,
   dictStatusEl,
+  hardModeBtn,
+  extremeModeBtn,
 } from './dom.js';
 import { state, setDictionarySet, initEnemySpecial } from './state.js';
 import { renderHearts, updateEnemyNameUI, updateEnemyStatusUI, renderEquipment, log, renderLog, message, updateWordUI, attachGridKeyboard } from './ui.js';
@@ -23,7 +26,7 @@ import { computeAttackInfo } from './compute.js';
 import { openShop, closeShop, selectHeal, equipItem } from './shop.js';
 import { closeEnding } from './endings.js';
 import { updateStats } from './stats.js';
-import { resetGame, startNewRun, gameWon, gameLost } from './game.js';
+import { resetGame, startNewRun, gameWon, gameLost, startNewRunHard, startNewRunExtreme } from './game.js';
 
 function isValidWord(w) {
   if (!w || w.length < 2) return false;
@@ -104,6 +107,14 @@ newGameBtn.addEventListener('click', () => {
   startNewRun();
 });
 
+// Difficulty mode events
+hardModeBtn.addEventListener('click', () => {
+  startNewRunHard();
+});
+extremeModeBtn.addEventListener('click', () => {
+  startNewRunExtreme();
+});
+
 // Shop events
 healBtn.addEventListener('click', () => selectHeal());
 equipItem1Btn.addEventListener('click', () => equipItem(0));
@@ -138,6 +149,11 @@ attachGridKeyboard();
 window.addEventListener('grid:tile-click', (e) => {
   const { r, c } = e.detail || {};
   if (typeof r === 'number' && typeof c === 'number') onTileClick(r, c);
+});
+
+// New Run button
+newRunBtn.addEventListener('click', () => {
+  startNewRun();
 });
 
 // Kick off

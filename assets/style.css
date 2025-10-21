@@ -16,21 +16,59 @@ body {
 }
 
 header {
-  background: #1b3a2e;
+  position: relative;
+  /* Wood signboard background with subtle grain */
+  background:
+    linear-gradient(180deg, #c8a165 0%, #a4743b 100%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 3px, rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 6px);
   color: #f3e8a1;
-  padding: 1.2rem 0 1.2rem;
+  padding: 0; /* keep header padding removed as requested */
   text-align: center;
   letter-spacing: 0.02em;
-  box-shadow: 0 2px 10px rgba(40,40,40,0.12);
+  border: 8px solid #6b4f2a; /* wood edge */
+  border-radius: 18px;        /* rounded signboard corners */
+  /* Add a golden outer border ring using box-shadow spread */
+  box-shadow: 0 0 0 6px #d4af37, 0 14px 28px rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.12);
 }
+/* Hanging ropes */
+header::before,
+header::after {
+  content: "";
+  position: absolute;
+  top: -28px;
+  width: 8px;
+  height: 38px;
+  background: repeating-linear-gradient(180deg, #d2b48c 0px, #b48a62 6px, #a8794f 12px);
+  border-radius: 6px;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+}
+header::before { left: 18%; }
+header::after  { right: 18%; }
+
 header h1 {
+  position: relative; /* allow decorative fasteners */
   font-family: "Jacquard 24", serif;
   color: #f3e8a1;
   font-weight: 400;
   letter-spacing: 0.04em;
   font-size: 9rem;
   line-height: 0.9;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.18); /* slight engraved effect */
 }
+/* Iron fasteners on the signboard */
+header h1::before,
+header h1::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3f3f46;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.08), 0 2px 0 rgba(0,0,0,0.25);
+}
+header h1::before { left: 18%; }
+header h1::after  { right: 18%; }
 
 main {
   flex: 1 0 auto;
@@ -75,7 +113,12 @@ footer {
   gap: .35rem;
 }
 .hud-side.right {
-  align-items: flex-end;
+  align-items: flex-start;
+}
+/* Ensure rows in enemy column take full width so "Next" aligns with enemy name */
+.hud-side.right .hud-row {
+  width: 100%;
+  justify-content: flex-start;
 }
 .hud-row {
   display: flex;
@@ -104,6 +147,8 @@ footer {
   display: inline-flex;
   gap: 4px;
   letter-spacing: 0; /* spacing now handled by gap */
+  flex-wrap: wrap;   /* allow hearts to wrap onto multiple lines */
+  white-space: normal;
 }
 .heart {
   position: relative;
@@ -159,6 +204,19 @@ footer {
   color: #3a2e1a
 }
 
+/* Expandable equipment container */
+.equip-details {
+  width: 100%;
+}
+.equip-details summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-block;
+}
+.equip-details .equip-list {
+  margin-top: .35rem;
+}
+
 .pill {
   padding: .35rem .65rem;
   border-radius: 999px;
@@ -192,12 +250,17 @@ footer {
   align-items: center;
   gap: 16px;
   margin: 0.6rem 0 0.8rem 0;
+  /* Reserve space to prevent layout shift while grid renders */
+  min-height: calc(4 * min(120px, 21vw) + 3 * 12px);
 }
 .grid {
   display: grid;
   grid-template-columns: repeat(4, min(120px, 21vw));
   grid-auto-rows: min(120px, 21vw);
   gap: 12px;
+  /* Fix grid container height to avoid component shifting during render */
+  height: calc(4 * min(120px, 21vw) + 3 * 12px);
+  min-height: calc(4 * min(120px, 21vw) + 3 * 12px);
 }
 .tile {
   display: grid;
@@ -346,6 +409,23 @@ footer {
   color: white;
 }
 
+/* Hard/Extreme styles */
+.btn.warning {
+  background: #b91c1c; /* red */
+  color: #fff;
+}
+.btn.danger {
+  background: #7f1d1d; /* deeper red */
+  color: #fff;
+  box-shadow: 0 0 0 rgba(185, 28, 28, 0.0), 0 2px 6px rgba(0,0,0,0.15);
+  animation: glowPulse 2.2s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%   { box-shadow: 0 0 0 rgba(185,28,28,0.0), 0 2px 6px rgba(0,0,0,0.15); }
+  50%  { box-shadow: 0 0 16px rgba(239,68,68,0.55), 0 6px 18px rgba(0,0,0,0.20); }
+  100% { box-shadow: 0 0 0 rgba(185,28,28,0.0), 0 2px 6px rgba(0,0,0,0.15); }
+}
+
 .log {
   margin-top: 1.0rem;
   padding-top: .5rem;
@@ -359,6 +439,7 @@ footer {
   justify-content: flex-end;
   align-items: center;
   margin-bottom: .4rem;
+  gap: .6rem; /* spacing between action buttons */
 }
 
 .damage-float {
@@ -440,6 +521,9 @@ footer {
     grid-template-columns: repeat(4, min(80px, 22vw));
     grid-auto-rows: min(80px, 22vw);
     gap: 10px;
+    /* Match fixed height to mobile tile size + gaps */
+    height: calc(4 * min(80px, 22vw) + 3 * 10px);
+    min-height: calc(4 * min(80px, 22vw) + 3 * 10px);
   }
   .hearts { font-size: 1.15rem; }
 }
@@ -462,10 +546,14 @@ footer {
     display: block;
     width: 360px;
     height: auto;
-    border-radius: 14px;
+    aspect-ratio: 1 / 1; /* square container */
+    border-radius: 18px;  /* softened rounded corners */
+    overflow: hidden;     /* ensure video corners are clipped to radius */
     box-shadow: 0 10px 30px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.12);
     outline: 1px solid rgba(0,0,0,0.06);
-    background: #000; /* avoid white flash before load */
+    background: #ffffff; /* white background */
+    object-fit: cover;   /* fill the square container */
+    object-position: center;
   }
 }
 
