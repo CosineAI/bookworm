@@ -27,6 +27,7 @@ export function computeAttackInfo() {
   let usedPoison = false;
   let usedCursed = false;
   let usedFrozen = false;
+  let usedGreenCount = 0;
 
   for (const p of state.selected) {
     const cell = state.grid[p.r][p.c];
@@ -43,6 +44,7 @@ export function computeAttackInfo() {
       case TILE_TYPES.POISON: usedPoison = true; break;
       case TILE_TYPES.CURSED: usedCursed = true; break;
       case TILE_TYPES.FROZEN: usedFrozen = true; break;
+      case TILE_TYPES.GREEN: usedGreenCount += 1; break;
       default: break;
     }
 
@@ -107,6 +109,7 @@ export function computeAttackInfo() {
     }
   }
 
+  // Cursed parity
   if (cursedCount > 0) {
     if (cursedCount % 2 === 1) {
       attackHalvesFloat *= 0.5;
@@ -118,12 +121,14 @@ export function computeAttackInfo() {
     effects.add('cursed');
   }
 
+  // Fire War Axe: +½ per fire tile on field
   if (state.activeEffects.fireWarAxe) {
     const fireTilesOnField = countFireTiles();
     if (fireTilesOnField > 0) effects.add('fire_war_axe');
     attackHalvesFloat += fireTilesOnField;
   }
 
+  // Long word scaling
   if (LONG_WORD_SCALING && typeof LONG_WORD_SCALING.threshold === 'number') {
     const extra = Math.max(0, letters - LONG_WORD_SCALING.threshold);
     if (extra > 0) {
@@ -134,11 +139,33 @@ export function computeAttackInfo() {
     }
   }
 
+  // Grayscale Gambit: +½ if any gray tile is used (non-stackable)
+  if (usedGray && state.activeEffects.grayGambit) {
+    attackHalvesFloat += 1;
+    effects.add('gray_gambit');
+  }
+
+  // Crimson Echo: +½ per consecutive previous turn using red (applies before frozen halving)
+  if (state.activeEffects.crimsonEcho && state.redEchoChain > 0) {
+    attackHalvesFloat += state.redEchoChain;
+    effects.add('crimson_echo');
+  }
+
+  // Frozen penalty: halves attack unless Ice Pick is equipped
   if (usedFrozen) {
-    attackHalvesFloat *= 0.5;
+    if (!state.activeEffects.ignoreFrozenPenalty) {
+      attackHalvesFloat *= 0.5;
+    }
     effects.add('frozen');
   }
 
+  // Herbal Surge: +1 heart heal if 2+ green tiles used this word
+  if (state.activeEffects.herbalSurge && usedGreenCount >= 2) {
+    healHalves += 2;
+    effects.add('herbal_surge');
+  }
+
+  // Effect flags
   if (usedRed) {
     effects.add('red');
     if (state.activeEffects.redEnhanced) effects.add('red_enhanced');

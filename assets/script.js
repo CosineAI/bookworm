@@ -77,6 +77,11 @@ submitBtn.addEventListener('click', () => {
   const { attackHalves, healHalves, effects } = computeAttackInfo();
 
   updateStats(w, attackHalves, effects);
+  // Update Crimson Echo chain: track consecutive turns using red tiles
+  {
+    const usedRedNow = Array.isArray(effects) && effects.includes('red');
+    state.redEchoChain = usedRedNow ? (state.redEchoChain + 1) : 0;
+  }
 
   const poisonUsed = used.some(({ r, c }) => state.grid[r][c].type === TILE_TYPES.POISON);
   if (poisonUsed) {
@@ -111,6 +116,8 @@ shuffleBtn.addEventListener('click', () => {
   if (state.gameOver) return;
   shuffleGrid();
   log('Shuffled letters. Passing turn...');
+  // Reset Crimson Echo chain on skipped turns
+  state.redEchoChain = 0;
   const playerDead = enemyAttack();
   if (playerDead) gameLost();
 });

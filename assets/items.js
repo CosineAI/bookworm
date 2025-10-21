@@ -28,6 +28,16 @@ export function createItemPool(ctx) {
     { key: 'fireWarAxe', name: 'Firey War Axe', desc: 'Adds ½ heart damage per fire tile on the field to each attack.',
       apply: () => { activeEffects.fireWarAxe = true; } },
 
+    // New items based on special tiles
+    { key: 'icePick', name: 'Ice Pick', desc: 'Frozen tiles no longer halve your attack; enemy still skips.',
+      apply: () => { activeEffects.ignoreFrozenPenalty = true; } },
+    { key: 'grayscaleGambit', name: 'Grayscale Gambit', desc: 'If any gray tile is used in a word, gain +½ heart attack (non-stackable).',
+      apply: () => { activeEffects.grayGambit = true; } },
+    { key: 'crimsonEcho', name: 'Crimson Echo', desc: 'If you used a red tile last turn, gain +½ heart attack. Stacks with consecutive turns.',
+      apply: () => { activeEffects.crimsonEcho = true; } },
+    { key: 'herbalSurge', name: 'Herbal Surge', desc: 'Using 2+ green tiles in a word heals an extra +1 heart.',
+      apply: () => { activeEffects.herbalSurge = true; } },
+
     // Blessings: triple spawn chance of a tile type
     { key: 'blessRed', name: 'Blessing of Red', desc: 'Red tiles appear three times as often.',
       apply: () => { safeSetSpawnBias({ red: 3 }); } },

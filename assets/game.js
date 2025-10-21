@@ -18,6 +18,11 @@ export function resetItemsAndEffects() {
   state.activeEffects.grayGoggles = false;
   state.activeEffects.fireWarAxe = false;
   state.activeEffects.frozenArmor = false;
+  // Reset new item effects
+  state.activeEffects.ignoreFrozenPenalty = false;
+  state.activeEffects.grayGambit = false;
+  state.activeEffects.crimsonEcho = false;
+  state.activeEffects.herbalSurge = false;
 
   resetSpawnBias();
 
@@ -68,6 +73,8 @@ export function resetGame() {
   state.gameOver = false;
 
   state.nextEnemyAttackHalved = false;
+  // Reset Crimson Echo chain between battles
+  state.redEchoChain = 0;
 
   advanceEnemy();
 
@@ -93,6 +100,8 @@ export function startNewRun() {
   // Ensure player health resets to full for a fresh run
   state.player.hp = state.player.maxHearts * HALF;
   state.nextEnemyAttackHalved = false;
+  // Reset Crimson Echo chain on new run
+  state.redEchoChain = 0;
 
   resetEnemyToFirst();
 
