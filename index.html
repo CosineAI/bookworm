@@ -170,35 +170,45 @@
       <div class="shop-modal" role="dialog" aria-labelledby="rulesTitle" aria-modal="true">
         <h2 id="rulesTitle">How to Play</h2>
         <p class="muted" style="margin-top:.2rem;">Form valid words to attack, manage effects, and defeat enemies.</p>
-        <div class="shop-items">
-          <div class="shop-item">
-            <div class="shop-item-info">
-              <strong>Basics</strong>
-              <div class="muted">Select letters to form a valid English word (2+ letters). Attack value is computed from your tiles. New tiles drop in after each turn.</div>
+        <div class="rules-content">
+          <div class="shop-items">
+            <div class="shop-item">
+              <div class="shop-item-info">
+                <strong>Basics</strong>
+                <div class="muted">Form valid English words by selecting tiles. They do not have to be touching in order to form words. The attack value is computed from your tiles, which is based on letter rarity and length of the word. Using up tiles will drop in new tiles. Strategically use the special tiles to defeat your enemy and win the game!</div>
+              </div>
             </div>
-          </div>
-          <div class="shop-item">
-            <div class="shop-item-info">
-              <strong>Tile Effects</strong>
-              <div class="muted">Red: double damage • Green: heal ½ • Gray: no damage • Fire: burns you each enemy turn • Poison: halves enemy’s next attack • Cursed: odd count halves, even ×1.5 • Frozen: halves attack but enemy skips their turn.</div>
+            <div class="shop-item">
+              <div class="shop-item-info">
+                <strong>Tile Effects</strong>
+                <ul class="muted rules-list" aria-label="Tile effects list">
+                  <li>Red: This letter deals double damage when used.</li>
+                  <li>Green: Heals you by ½ heart when used.</li>
+                  <li>Gray: Contributes no damage when used.</li>
+                  <li>Fire: Burns you for ½ heart at the end of each enemy turn until removed.</li>
+                  <li>Poison: Halves the enemy’s next attack when used.</li>
+                  <li>Cursed: Odd count halves total attack; even count increases attack by 1.5×.</li>
+                  <li>Frozen: Halves your total attack this turn but the enemy skips their turn (including specials).</li>
+                </ul>
+              </div>
             </div>
-          </div>
-          <div class="shop-item">
-            <div class="shop-item-info">
-              <strong>Enemy Turns</strong>
-              <div class="muted">Enemies strike each turn and may apply specials or debuffs (gray/fire tiles). Fire hazards deal damage based on fire tiles present.</div>
+            <div class="shop-item">
+              <div class="shop-item-info">
+                <strong>Enemy Turns</strong>
+                <div class="muted">Enemies strike each turn and may apply specials or debuffs (gray/fire tiles). Fire hazards deal damage based on fire tiles present.</div>
+              </div>
             </div>
-          </div>
-          <div class="shop-item">
-            <div class="shop-item-info">
-              <strong>Between Battles</strong>
-              <div class="muted">Choose ONE: heal to full OR equip one item. Equipment modifies effects or spawn rates.</div>
+            <div class="shop-item">
+              <div class="shop-item-info">
+                <strong>Between Battles</strong>
+                <div class="muted">Choose ONE: heal to full OR equip one item. Equipment modifies effects or spawn rates.</div>
+              </div>
             </div>
-          </div>
-          <div class="shop-item">
-            <div class="shop-item-info">
-              <strong>Difficulty</strong>
-              <div class="muted">Normal, Hard, Extreme increase enemy HP.</div>
+            <div class="shop-item">
+              <div class="shop-item-info">
+                <strong>Difficulty</strong>
+                <div class="muted">Difficulty will increase enemy HP. This can be quite challenging!</div>
+              </div>
             </div>
           </div>
         </div>

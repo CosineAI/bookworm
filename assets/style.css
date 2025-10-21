@@ -536,6 +536,24 @@ footer {
   margin-top: 1.0rem;
 }
 
+/* Rules modal scroll container */
+.rules-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-top: .6rem;
+  padding-right: 8px; /* prevent scrollbar overlaying content */
+}
+
+/* Better list formatting for tile effects */
+.rules-list {
+  margin: .3rem 0 0;
+  padding-left: 1.2rem;
+}
+.rules-list li {
+  margin: .2rem 0;
+  line-height: 1.4;
+}
+
 @media (max-width: 850px) {
   main {
     max-width: 98vw;
