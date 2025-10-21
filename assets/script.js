@@ -14,6 +14,7 @@ import {
   equipItem2Btn,
   continueBtn,
   endingRestartBtn,
+  defeatRestartBtn,
   dictStatusEl,
   hardModeBtn,
   extremeModeBtn,
@@ -27,7 +28,7 @@ import { initGrid, renderGrid, onTileClick, clearSelection, refillUsedTiles, shu
 import { enemyAttack, playerAttack } from './combat.js';
 import { computeAttackInfo } from './compute.js';
 import { openShop, closeShop, selectHeal, equipItem } from './shop.js';
-import { closeEnding } from './endings.js';
+import { closeEnding, closeDefeat } from './endings.js';
 import { updateStats } from './stats.js';
 import { resetGame, startNewRun, gameWon, gameLost, startNewRunHard, startNewRunExtreme } from './game.js';
 
@@ -147,6 +148,14 @@ window.addEventListener('shop:proceed', () => {
 
 endingRestartBtn.addEventListener('click', () => {
   closeEnding();
+  // Restart in Normal mode
+  state.difficultyMultiplier = 1;
+  startNewRun();
+  updateModeUI();
+});
+
+defeatRestartBtn.addEventListener('click', () => {
+  closeDefeat();
   // Restart in Normal mode
   state.difficultyMultiplier = 1;
   startNewRun();

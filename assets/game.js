@@ -7,7 +7,7 @@ import { renderHearts, updateEnemyNameUI, updateEnemyStatusUI, renderEquipment, 
 import { initGrid, renderGrid } from './grid.js';
 import { resetSpawnBias } from './tiles.js';
 import { openShop } from './shop.js';
-import { openEnding } from './endings.js';
+import { openEnding, openDefeat } from './endings.js';
 import { clearRunStats, showRunStats } from './stats.js';
 
 export function resetItemsAndEffects() {
@@ -60,7 +60,8 @@ export function gameLost() {
   submitBtn.disabled = true;
   shuffleBtn.disabled = true;
   showRunStats('Run stats');
-  newGameBtn.style.display = 'inline-block';
+  // Show defeat modal with best words and restart option
+  openDefeat();
 }
 
 export function resetGame() {

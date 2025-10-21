@@ -165,6 +165,37 @@
       </div>
     </div>
 
+    <!-- Defeat overlay -->
+    <div id="defeatOverlay" class="shop-overlay" aria-hidden="true">
+      <div class="shop-modal" role="dialog" aria-labelledby="defeatTitle" aria-modal="true">
+        <h2 id="defeatTitle">Defeat</h2>
+        <p id="defeatMessage" class="muted" style="margin-top:.2rem;">You were defeated by the <strong id="defeatEnemyName">Enemy</strong>. Here are your best words:</p>
+        <div class="shop-items">
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Longest word</strong>
+              <div id="defeatLongest" class="muted">(none)</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Highest attack</strong>
+              <div id="defeatHighest" class="muted">(none)</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Most effects</strong>
+              <div id="defeatEffects" class="muted">(none)</div>
+            </div>
+          </div>
+        </div>
+        <div class="shop-actions">
+          <button id="defeatRestartBtn" class="btn primary">New Run</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Rules / Introduction overlay -->
     <div id="rulesOverlay" class="shop-overlay" aria-hidden="true">
       <div class="shop-modal" role="dialog" aria-labelledby="rulesTitle" aria-modal="true">
