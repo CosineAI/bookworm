@@ -51,6 +51,14 @@ async function initDictionary() {
   }
 }
 
+// UI: reflect current mode with a ring around the active button
+function updateModeUI() {
+  const m = state.difficultyMultiplier || 1;
+  if (newRunBtn) newRunBtn.classList.toggle('mode-active', Math.abs(m - 1.0) < 0.01);
+  if (hardModeBtn) hardModeBtn.classList.toggle('mode-active', Math.abs(m - 1.5) < 0.01);
+  if (extremeModeBtn) extremeModeBtn.classList.toggle('mode-active', Math.abs(m - 2.0) < 0.01);
+}
+
 // Events
 submitBtn.addEventListener('click', () => {
   if (state.gameOver) return;
@@ -107,15 +115,20 @@ shuffleBtn.addEventListener('click', () => {
 });
 
 newGameBtn.addEventListener('click', () => {
+  // New Game resets to Normal mode
+  state.difficultyMultiplier = 1;
   startNewRun();
+  updateModeUI();
 });
 
 // Difficulty mode events
 hardModeBtn.addEventListener('click', () => {
   startNewRunHard();
+  updateModeUI();
 });
 extremeModeBtn.addEventListener('click', () => {
   startNewRunExtreme();
+  updateModeUI();
 });
 
 // Shop events
@@ -134,7 +147,10 @@ window.addEventListener('shop:proceed', () => {
 
 endingRestartBtn.addEventListener('click', () => {
   closeEnding();
+  // Restart in Normal mode
+  state.difficultyMultiplier = 1;
   startNewRun();
+  updateModeUI();
 });
 
 // Rules modal toggle
@@ -182,7 +198,10 @@ window.addEventListener('grid:tile-click', (e) => {
 
 // New Run button
 newRunBtn.addEventListener('click', () => {
+  // Footer New Game resets to Normal mode
+  state.difficultyMultiplier = 1;
   startNewRun();
+  updateModeUI();
 });
 
 // Kick off
@@ -196,3 +215,4 @@ updateEnemyNameUI();
 updateEnemyStatusUI();
 renderEquipment();
 log(`Enemy: ${state.enemy.name}.`);
+updateModeUI();

@@ -424,6 +424,12 @@ footer {
   outline: 3px solid rgba(37,99,235,0.6);
   outline-offset: 2px;
 }
+/* Active game mode ring */
+.btn.mode-active {
+  outline: 4px solid #1f2937;
+  outline-offset: 2px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
 .btn.primary {
   background: #2f6f3e; /* forest green */
   color: white;
