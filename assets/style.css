@@ -27,7 +27,8 @@ header {
   letter-spacing: 0.02em;
   border: 8px solid #6b4f2a; /* wood edge */
   border-radius: 18px;        /* rounded signboard corners */
-  box-shadow: 0 14px 28px rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.12);
+  /* Add a golden outer border ring using box-shadow spread */
+  box-shadow: 0 0 0 6px #d4af37, 0 14px 28px rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.12);
 }
 /* Hanging ropes */
 header::before,
