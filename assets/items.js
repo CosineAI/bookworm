@@ -28,6 +28,32 @@ export function createItemPool(ctx) {
     { key: 'fireWarAxe', name: 'Firey War Axe', desc: 'Adds ½ heart damage per fire tile on the field to each attack.',
       apply: () => { activeEffects.fireWarAxe = true; } },
 
+    // New items based on special tiles
+    { key: 'icePick', name: 'Ice Pick', desc: 'Frozen tiles no longer halve your attack; enemy still skips.',
+      apply: () => { activeEffects.ignoreFrozenPenalty = true; } },
+    { key: 'grayscaleGambit', name: 'Grayscale Gambit', desc: 'If any gray tile is used in a word, gain +½ heart attack (non-stackable).',
+      apply: () => { activeEffects.grayGambit = true; } },
+    { key: 'crimsonEcho', name: 'Crimson Echo', desc: 'If you used a red tile last turn, gain +½ heart attack. Stacks with consecutive turns.',
+      apply: () => { activeEffects.crimsonEcho = true; } },
+    { key: 'herbalSurge', name: 'Herbal Surge', desc: 'Using 2+ green tiles in a word heals an extra +1 heart.',
+      apply: () => { activeEffects.herbalSurge = true; } },
+
+    // Word-based items
+    { key: 'doublingDoubloon', name: 'Doubling Doubloon', desc: 'Adds +½ heart of damage if the word has the same letter twice in a row.',
+      apply: () => { activeEffects.doublingDoubloon = true; } },
+    { key: 'jqzxExpert', name: 'JQZX Expert', desc: 'Triples damage for letters J, Q, Z, X.',
+      apply: () => { activeEffects.jqzxExpert = true; } },
+    { key: 'scrabbler', name: 'Scrabbler', desc: 'Doubles attack for words that are 7 letters or longer.',
+      apply: () => { activeEffects.scrabbler = true; } },
+    { key: 'palindromer', name: 'Palindromer', desc: '×1.5 attack for words that are palindromes.',
+      apply: () => { activeEffects.palindromer = true; } },
+    { key: 'mirrorEdge', name: 'Mirror Edge', desc: 'Adds +½ heart of damage if the word’s first and last letters match.',
+      apply: () => { activeEffects.mirrorEdge = true; } },
+    { key: 'vowelSuite', name: 'Vowel Suite', desc: '×1.5 attack if the word contains four or more distinct vowels.',
+      apply: () => { activeEffects.vowelSuite = true; } },
+    { key: 'suffixSpecialist', name: 'Suffix Specialist', desc: '×1.25 attack if the word ends with “ING”, “ED”, or “ER”.',
+      apply: () => { activeEffects.suffixSpecialist = true; } },
+
     // Blessings: triple spawn chance of a tile type
     { key: 'blessRed', name: 'Blessing of Red', desc: 'Red tiles appear three times as often.',
       apply: () => { safeSetSpawnBias({ red: 3 }); } },

@@ -382,6 +382,7 @@ footer {
 
 .wordbar {
   margin-top: 1.0rem;
+  margin-bottom: .4rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -561,6 +562,18 @@ footer {
 }
 
 @media (max-width: 850px) {
+  /* Shrink header and heading on narrower screens */
+  header {
+    max-width: 96vw;
+    margin: 1.0rem auto 0;
+    border-width: 6px;
+  }
+  header h1 {
+    font-size: 5rem;
+    letter-spacing: 0.03em;
+    line-height: 0.9;
+  }
+
   main {
     max-width: 98vw;
     padding: 1.0rem 1rem 1.2rem;
@@ -573,7 +586,26 @@ footer {
     height: calc(4 * min(80px, 22vw) + 3 * 10px);
     min-height: calc(4 * min(80px, 22vw) + 3 * 10px);
   }
+  /* Ensure the board container tightly fits the grid on smaller screens */
+  .board {
+    height: calc(4 * min(80px, 22vw) + 3 * 10px);
+    min-height: calc(4 * min(80px, 22vw) + 3 * 10px);
+  }
   .hearts { font-size: 1.15rem; }
+}
+
+/* Extra-small phones: shrink the header further */
+@media (max-width: 520px) {
+  header {
+    max-width: 96vw;
+    margin: .8rem auto 0;
+    border-width: 5px;
+  }
+  header h1 {
+    font-size: 3.8rem;
+    letter-spacing: 0.02em;
+    line-height: 0.9;
+  }
 }
 
 /* Layout wrapper to center the whole composition */

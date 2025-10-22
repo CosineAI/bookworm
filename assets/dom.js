@@ -42,7 +42,16 @@ export const endingHighestEl = document.getElementById('endingHighest');
 export const endingEffectsEl = document.getElementById('endingEffects');
 export const endingRestartBtn = document.getElementById('endingRestartBtn');
 
+// Defeat DOM
+export const defeatOverlay = document.getElementById('defeatOverlay');
+export const defeatEnemyNameEl = document.getElementById('defeatEnemyName');
+export const defeatLongestEl = document.getElementById('defeatLongest');
+export const defeatHighestEl = document.getElementById('defeatHighest');
+export const defeatEffectsEl = document.getElementById('defeatEffects');
+export const defeatRestartBtn = document.getElementById('defeatRestartBtn');
+
 // Rules DOM
 export const rulesOverlay = document.getElementById('rulesOverlay');
 export const rulesBtn = document.getElementById('rulesBtn');
 export const rulesCloseBtn = document.getElementById('rulesCloseBtn');
+export const itemsListEl = document.getElementById('itemsList');

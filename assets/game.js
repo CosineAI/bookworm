@@ -7,7 +7,7 @@ import { renderHearts, updateEnemyNameUI, updateEnemyStatusUI, renderEquipment, 
 import { initGrid, renderGrid } from './grid.js';
 import { resetSpawnBias } from './tiles.js';
 import { openShop } from './shop.js';
-import { openEnding } from './endings.js';
+import { openEnding, openDefeat } from './endings.js';
 import { clearRunStats, showRunStats } from './stats.js';
 
 export function resetItemsAndEffects() {
@@ -18,6 +18,18 @@ export function resetItemsAndEffects() {
   state.activeEffects.grayGoggles = false;
   state.activeEffects.fireWarAxe = false;
   state.activeEffects.frozenArmor = false;
+  // Reset new item effects
+  state.activeEffects.ignoreFrozenPenalty = false;
+  state.activeEffects.grayGambit = false;
+  state.activeEffects.crimsonEcho = false;
+  state.activeEffects.herbalSurge = false;
+  state.activeEffects.doublingDoubloon = false;
+  state.activeEffects.jqzxExpert = false;
+  state.activeEffects.scrabbler = false;
+  state.activeEffects.palindromer = false;
+  state.activeEffects.mirrorEdge = false;
+  state.activeEffects.vowelSuite = false;
+  state.activeEffects.suffixSpecialist = false;
 
   resetSpawnBias();
 
@@ -60,13 +72,16 @@ export function gameLost() {
   submitBtn.disabled = true;
   shuffleBtn.disabled = true;
   showRunStats('Run stats');
-  newGameBtn.style.display = 'inline-block';
+  // Show defeat modal with best words and restart option
+  openDefeat();
 }
 
 export function resetGame() {
   state.gameOver = false;
 
   state.nextEnemyAttackHalved = false;
+  // Reset Crimson Echo chain between battles
+  state.redEchoChain = 0;
 
   advanceEnemy();
 
@@ -92,6 +107,8 @@ export function startNewRun() {
   // Ensure player health resets to full for a fresh run
   state.player.hp = state.player.maxHearts * HALF;
   state.nextEnemyAttackHalved = false;
+  // Reset Crimson Echo chain on new run
+  state.redEchoChain = 0;
 
   resetEnemyToFirst();
 

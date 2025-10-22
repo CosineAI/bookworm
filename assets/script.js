@@ -14,12 +14,14 @@ import {
   equipItem2Btn,
   continueBtn,
   endingRestartBtn,
+  defeatRestartBtn,
   dictStatusEl,
   hardModeBtn,
   extremeModeBtn,
   rulesBtn,
   rulesOverlay,
   rulesCloseBtn,
+  itemsListEl,
 } from './dom.js';
 import { state, setDictionarySet, initEnemySpecial } from './state.js';
 import { renderHearts, updateEnemyNameUI, updateEnemyStatusUI, renderEquipment, log, renderLog, message, updateWordUI, attachGridKeyboard } from './ui.js';
@@ -27,9 +29,10 @@ import { initGrid, renderGrid, onTileClick, clearSelection, refillUsedTiles, shu
 import { enemyAttack, playerAttack } from './combat.js';
 import { computeAttackInfo } from './compute.js';
 import { openShop, closeShop, selectHeal, equipItem } from './shop.js';
-import { closeEnding } from './endings.js';
+import { closeEnding, closeDefeat } from './endings.js';
 import { updateStats } from './stats.js';
 import { resetGame, startNewRun, gameWon, gameLost, startNewRunHard, startNewRunExtreme } from './game.js';
+import { createItemPool } from './items.js';
 
 function isValidWord(w) {
   if (!w || w.length < 2) return false;
@@ -76,6 +79,11 @@ submitBtn.addEventListener('click', () => {
   const { attackHalves, healHalves, effects } = computeAttackInfo();
 
   updateStats(w, attackHalves, effects);
+  // Update Crimson Echo chain: track consecutive turns using red tiles
+  {
+    const usedRedNow = Array.isArray(effects) && effects.includes('red');
+    state.redEchoChain = usedRedNow ? (state.redEchoChain + 1) : 0;
+  }
 
   const poisonUsed = used.some(({ r, c }) => state.grid[r][c].type === TILE_TYPES.POISON);
   if (poisonUsed) {
@@ -110,6 +118,8 @@ shuffleBtn.addEventListener('click', () => {
   if (state.gameOver) return;
   shuffleGrid();
   log('Shuffled letters. Passing turn...');
+  // Reset Crimson Echo chain on skipped turns
+  state.redEchoChain = 0;
   const playerDead = enemyAttack();
   if (playerDead) gameLost();
 });
@@ -153,9 +163,28 @@ endingRestartBtn.addEventListener('click', () => {
   updateModeUI();
 });
 
+defeatRestartBtn.addEventListener('click', () => {
+  closeDefeat();
+  // Restart in Normal mode
+  state.difficultyMultiplier = 1;
+  startNewRun();
+  updateModeUI();
+});
+
 // Rules modal toggle
+function renderItemsList() {
+  if (!itemsListEl) return;
+  itemsListEl.innerHTML = '';
+  const items = createItemPool({ activeEffects: {}, setSpawnBias: () => {}, player: { maxHearts: 0 }, renderHearts: () => {} });
+  for (const it of items) {
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${it.name}</strong>: ${it.desc}`;
+    itemsListEl.appendChild(li);
+  }
+}
 function openRules() {
   if (!rulesOverlay) return;
+  renderItemsList();
   rulesOverlay.classList.add('show');
   rulesOverlay.setAttribute('aria-hidden', 'false');
 }

@@ -39,6 +39,18 @@ export const state = {
     grayGoggles: false,
     fireWarAxe: false,
     frozenArmor: false,
+    // New effects
+    ignoreFrozenPenalty: false, // Ice Pick
+    grayGambit: false,          // Grayscale Gambit
+    crimsonEcho: false,         // Crimson Echo
+    herbalSurge: false,         // Herbal Surge
+    doublingDoubloon: false,    // Doubling Doubloon
+    jqzxExpert: false,          // JQZX Expert
+    scrabbler: false,           // Scrabbler
+    palindromer: false,         // Palindromer
+    mirrorEdge: false,          // Mirror Edge
+    vowelSuite: false,          // Vowel Suite
+    suffixSpecialist: false,    // Suffix Specialist
   },
   shopSelectionMade: false,
   equippedItems: [],
@@ -46,6 +58,9 @@ export const state = {
   // Enemy status
   nextEnemyAttackHalved: false,
   enemySpecial: { every: null, countdown: null },
+
+  // Momentum tracking for Crimson Echo
+  redEchoChain: 0,
 
   // Difficulty (HP scaling for enemies)
   difficultyMultiplier: 1,

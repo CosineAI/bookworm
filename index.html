@@ -30,9 +30,9 @@
         </div>
         <div class="hud-row small">
           <details id="equipmentDetails" class="equip-details">
-            <summary class="hud-label">Equipment</summary>
-            <div id="equipmentList" class="equip-list"></div>
-          </details>
+              <summary class="hud-label">Equipment <span class="muted">(Toggle current equipment)</span></summary>
+              <div id="equipmentList" class="equip-list"></div>
+            </details>
         </div>
       </div>
 
@@ -165,6 +165,37 @@
       </div>
     </div>
 
+    <!-- Defeat overlay -->
+    <div id="defeatOverlay" class="shop-overlay" aria-hidden="true">
+      <div class="shop-modal" role="dialog" aria-labelledby="defeatTitle" aria-modal="true">
+        <h2 id="defeatTitle">Defeat</h2>
+        <p id="defeatMessage" class="muted" style="margin-top:.2rem;">You were defeated by the <strong id="defeatEnemyName">Enemy</strong>. Here are your best words:</p>
+        <div class="shop-items">
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Longest word</strong>
+              <div id="defeatLongest" class="muted">(none)</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Highest attack</strong>
+              <div id="defeatHighest" class="muted">(none)</div>
+            </div>
+          </div>
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <strong>Most effects</strong>
+              <div id="defeatEffects" class="muted">(none)</div>
+            </div>
+          </div>
+        </div>
+        <div class="shop-actions">
+          <button id="defeatRestartBtn" class="btn primary">New Run</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Rules / Introduction overlay -->
     <div id="rulesOverlay" class="shop-overlay" aria-hidden="true">
       <div class="shop-modal" role="dialog" aria-labelledby="rulesTitle" aria-modal="true">
@@ -210,6 +241,16 @@
                 <div class="muted">Difficulty will increase enemy HP. This can be quite challenging!</div>
               </div>
             </div>
+          </div>
+          <!-- Items list section -->
+          <div class="shop-items" style="margin-top:.6rem;">
+            <div class="shop-item">
+              <div class="shop-item-info">
+                <strong>Items</strong>
+                <div class="muted">All equipment and word-based items available in the game:</div>
+              </div>
+            </div>
+            <ul id="itemsList" class="muted rules-list" aria-label="Items list"></ul>
           </div>
         </div>
         <div class="shop-actions">
